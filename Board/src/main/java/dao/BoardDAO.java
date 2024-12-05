@@ -4,7 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import dto.BoardDTO;
 
-@Mapper
+@Mapper 
 public interface BoardDAO {
     List<BoardDTO> getAllBoardList() throws Exception; //게시판 목록 조회
     int createBoard(BoardDTO requestParam) throws Exception; //게시물 생성
