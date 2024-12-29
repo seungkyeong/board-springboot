@@ -14,5 +14,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<ErrorResponseDTO> handleExceptionInternal(GeneralException ex){
 		ErrorResponseDTO<Object> errorResponse = new ErrorResponseDTO<>(ex.getCode(), ex.getMessage());
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    } 
 }

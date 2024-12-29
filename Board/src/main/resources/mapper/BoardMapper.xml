@@ -4,24 +4,40 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="dao.BoardDAO">
-    <select id="getAllBoardList" resultType="dto.BoardDTO">
+    <select id="getAllBoardList" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
         SELECT 
-        	system_no as sysNo, 
-        	title, content, 
-        	user_id as userId, 
-        	user_name as userName,
+       		system_no as sysNo, 
+       		title, content, 
+       		id as userId, 
+       		user_system_no as userSysNo,
         	create_date as createDate,
         	modify_date as modifyDate, 
-        	view,
-        	img_path as imgPath
+       		view,
+        	img_path as strImgPath
         FROM board 
-        ORDER BY createDate ASC;
+        WHERE 1=1
+        <if test="searchList.title != null and searchList.title != ''">
+        	AND title LIKE CONCAT('%', #{searchList.title}, '%')
+        </if>
+        <if test="searchList.content != null and searchList.content != ''">
+        	AND content LIKE CONCAT('%', #{searchList.content}, '%')
+        </if>
+        <if test="searchList.userName != null and searchList.userId != ''">
+        	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
+        </if>
+        <if test="searchList.createDate != null and searchList.createDate != ''">
+        	AND create_date LIKE CONCAT('%', #{searchList.createDate}, '%')
+        </if>
+        <if test="searchList.modifyDate != null and searchList.modifyDate != ''">
+        	AND modify_date LIKE CONCAT('%', #{searchList.modifyDate}, '%')
+        </if>
+        ORDER BY createDate DESC;
     </select>
     
     <insert id="createBoard" useGeneratedKeys="false">
         INSERT 
-        	INTO board (system_no, title, content, user_id, user_name, create_date, modify_date, view, img_path)
-        	VALUES (REPLACE(UUID(), '-', ''), #{title}, #{content}, #{userId}, #{userName}, now(), now(), 0, #{imgPath});
+        	INTO board (system_no, title, content, id, user_system_no, create_date, modify_date, view, img_path)
+        	VALUES (REPLACE(UUID(), '-', ''), #{title}, #{content}, #{userId}, #{userSysNo}, now(), now(), 0, #{strImgPath});
     </insert>
     
     <update id="updateBoard" useGeneratedKeys="false">
@@ -29,24 +45,62 @@
     	SET
         	title = #{title},
         	content = #{content},
-        	user_id = #{userId},
-        	user_name = #{userName},
+        	id = #{userId},
+        	user_system_no = #{userSysNo},
         	modify_date = now(),  
-        	img_path = #{imgPath}
+        	img_path = #{strImgPath}
     	WHERE system_no = #{sysNo}
 	</update>
     
-    <select id="getBoardDetail" resultType="dto.BoardDTO">
+    <select id="getBoardDetail" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
         SELECT 
         	system_no as sysNo,  
         	title, content, 
-        	user_id as userId, 
-        	user_name as userName,
+        	id as userId, 
+        	user_system_no as userSysNo,
         	create_date as createDate,
         	modify_date as modifyDate, 
         	view,
-        	img_path as imgPath
+        	img_path as strImgPath
         FROM board 
-        WHERE system_no = #{sysNo};
+        WHERE system_no = #{searchList.sysNo};
     </select>
+    
+    <insert id="createUser" useGeneratedKeys="false">
+        INSERT 
+        	INTO user (system_no, id, password, name, create_date, modify_date, email, phone)
+        	VALUES (REPLACE(UUID(), '-', ''), #{id}, #{password}, #{name}, now(), now(),#{email}, #{phone});
+    </insert>
+    
+    <select id="checkUser" resultType="dto.UserDTO" parameterType="hashMap">
+        SELECT 
+        	system_no as sysNo,  
+        	id as id, 
+        	password as password,
+        	name as name,
+        	email as email,
+        	phone as phone,
+        	create_date as createDate,
+        	modify_date as modifyDate
+        FROM user 
+        WHERE 1=1
+        AND ${key} = #{value};
+    </select>
+    
+    <update id="updateUserDetail" useGeneratedKeys="false">
+    	UPDATE user
+    	SET
+        	name = #{name},
+        	modify_date = now(),  
+        	phone = #{phone},
+        	email = #{email}
+    	WHERE system_no = #{sysNo}
+	</update>
+	
+	<update id="updateUserPw" parameterType="hashMap">
+    	UPDATE user
+    	SET
+        	password = #{newPassword}
+    	WHERE system_no = #{sysNo}
+	</update>
 </mapper>

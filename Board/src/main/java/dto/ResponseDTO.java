@@ -3,9 +3,6 @@ package dto;
 import constant.ExceptionConstant;
 
 //공통 Response
-//@Getter //컴파일시 lombok이 Getter 만들어줌
-//@ToString
-//@RequiredArgsConstructor
 public class ResponseDTO<T> {
 
     private Boolean success;
@@ -20,14 +17,6 @@ public class ResponseDTO<T> {
     	this.message = ExceptionConstant.OK.getMessage();
     	
     }
-    
-    //성공 응답
-//    public ResponseDTO(boolean success, int code, String message, T data) {
-//    	this.success = success;
-//    	this.code = code;
-//    	this.message = message;
-//    	this.data = data;
-//    }
     
     // 에러 응답 생성자
     public ResponseDTO(boolean success, int code, String message) {
