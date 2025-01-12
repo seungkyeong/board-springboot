@@ -40,7 +40,7 @@ public class BoardDTO {
     
     // Getter: 포맷된 날짜 반환
     public String getFormattedCreateDate() {
-        return createDate != null ? createDate.format(FORMATTER) : null;
+        return createDate != null ? createDate.plusHours(9).format(FORMATTER) : null;
     }
 
     public void setFormattedCreateDate(String formattedCreateDate) {
@@ -48,7 +48,7 @@ public class BoardDTO {
 	}
 
 	public String getFormattedModifyDate() {
-        return modifyDate != null ? modifyDate.format(FORMATTER) : null;
+        return modifyDate != null ? modifyDate.plusHours(9).format(FORMATTER) : null;
     }
 	
 

@@ -26,11 +26,17 @@
         	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
         </if>
         <if test="searchList.createDate != null and searchList.createDate != ''">
-        	AND create_date LIKE CONCAT('%', #{searchList.createDate}, '%')
-        </if>
-        <if test="searchList.modifyDate != null and searchList.modifyDate != ''">
-        	AND modify_date LIKE CONCAT('%', #{searchList.modifyDate}, '%')
-        </if>
+        	<![CDATA[
+        		AND create_date >= #{searchList.createDate}
+        		AND create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
+        	]]>
+    	</if>
+    	<if test="searchList.modifyDate != null and searchList.modifyDate != ''">
+    		<![CDATA[
+        		AND modify_date >= #{searchList.modifyDate}
+        		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
+        	]]>
+    	</if>
         ORDER BY createDate DESC;
     </select>
     
