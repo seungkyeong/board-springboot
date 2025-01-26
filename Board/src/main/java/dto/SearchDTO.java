@@ -7,6 +7,7 @@ public class SearchDTO {
     private int pageIndex;
     private int pageSize;	
     private Map<String, String> searchList;	
+    private int countFlag; //count flag
     
     public SearchDTO() {
     	this.pageIndex = 0;
@@ -42,6 +43,14 @@ public class SearchDTO {
 
 	public void setSearchList(Map<String, String> searchList) {
 		this.searchList = searchList;
+	}
+	
+	public int getCountFlag() {
+		return countFlag;
+	}
+
+	public void setCountFlag(int countFlag) {
+		this.countFlag = countFlag;
 	}
 }
 

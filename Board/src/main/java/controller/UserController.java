@@ -39,11 +39,11 @@ public class UserController {
     
     // 로그인
     @PostMapping("/login")
-    public ResponseDTO<Object> login(@RequestBody Map<String, String> loginData) throws Exception {
-    	 String id = loginData.get("id");
-    	 String password = loginData.get("password");
+    public ResponseDTO<Object> login(@RequestBody Map<String, String> loginData) throws Exception {	 
+    	String id = loginData.get("id");
+    	String password = loginData.get("password");
     	 
-    	 String data = userService.login(id, password); //jwtToken
+    	String data = userService.login(id, password); //jwtToken
     	    
     	return new ResponseDTO<>(data);
     }

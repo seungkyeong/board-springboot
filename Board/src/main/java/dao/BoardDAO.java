@@ -11,10 +11,11 @@ import dto.UserDTO;
 public interface BoardDAO {
 	/* Board */
     List<BoardDTO> getAllBoardList(SearchDTO requestParam) throws Exception; //게시판 목록 조회
-    int allCountBoard(SearchDTO requestParam) throws Exception; //게시판 목록 개수 조회
+    int getAllCountBoardList(SearchDTO requestParam) throws Exception; //게시판 목록 개수 조회
     int createBoard(BoardDTO requestParam) throws Exception; //게시물 생성
     int updateBoard(BoardDTO requestParam) throws Exception; //게시물 수정
     BoardDTO getBoardDetail(SearchDTO requestParam) throws Exception; //게시물 상세 조회
+    int syncViewCount(String sysNo, Long viewCount) throws Exception; //게시물 조회수 업데이트
     
     /* User */
     int createUser(UserDTO requestParam) throws Exception; //회원가입

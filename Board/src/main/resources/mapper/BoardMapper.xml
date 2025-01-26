@@ -4,8 +4,36 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="dao.BoardDAO">
+<select id="getAllCountBoardList" parameterType="dto.SearchDTO">
+    	SELECT Count(*) as boardListCount	
+        FROM board 
+        WHERE 1=1
+        <if test="searchList.title != null and searchList.title != ''">
+        	AND title LIKE CONCAT('%', #{searchList.title}, '%')
+        </if>
+        <if test="searchList.content != null and searchList.content != ''">
+        	AND content LIKE CONCAT('%', #{searchList.content}, '%')
+        </if>
+        <if test="searchList.userId != null and searchList.userId != ''">
+        	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
+        </if>
+        <if test="searchList.createDate != null and searchList.createDate != ''">
+        	<![CDATA[
+        		AND create_date >= #{searchList.createDate}
+        		AND create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
+        	]]>
+    	</if>
+    	<if test="searchList.modifyDate != null and searchList.modifyDate != ''">
+    		<![CDATA[
+        		AND modify_date >= #{searchList.modifyDate}
+        		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
+        	]]>
+    	</if>
+        </select>
+
+
     <select id="getAllBoardList" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
-        SELECT 
+    	SELECT 
        		system_no as sysNo, 
        		title, content, 
        		id as userId, 
@@ -22,7 +50,7 @@
         <if test="searchList.content != null and searchList.content != ''">
         	AND content LIKE CONCAT('%', #{searchList.content}, '%')
         </if>
-        <if test="searchList.userName != null and searchList.userId != ''">
+        <if test="searchList.userId != null and searchList.userId != ''">
         	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
         </if>
         <if test="searchList.createDate != null and searchList.createDate != ''">
@@ -37,7 +65,8 @@
         		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
-        ORDER BY createDate DESC;
+        ORDER BY createDate DESC
+        LIMIT #{pageSize} OFFSET #{pageIndex};
     </select>
     
     <insert id="createBoard" useGeneratedKeys="false">
@@ -107,6 +136,14 @@
     	UPDATE user
     	SET
         	password = #{newPassword}
+    	WHERE system_no = #{sysNo}
+	</update>
+	
+	<update id="syncViewCount" useGeneratedKeys="false">
+    	UPDATE board
+    	SET
+        	view = #{viewCount},
+        	modify_date = now()
     	WHERE system_no = #{sysNo}
 	</update>
 </mapper>

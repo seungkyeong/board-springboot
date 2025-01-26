@@ -29,10 +29,7 @@ public class BoardController {
     /* 게시판 목록 조회 */
     @PostMapping("/list")
     public ResponseDTO<Object> getBoardList(@RequestBody SearchDTO search) throws Exception {
-    	List<BoardDTO> data = boardService.getAllBoardList(search);
-    	System.out.println(search);
-    	System.out.printf("boardList: ");
-    	System.out.println(data.toString());
+    	List<Object> data = boardService.getAllBoardList(search);
     	return new ResponseDTO<>(data);
     }
     
@@ -79,6 +76,20 @@ public class BoardController {
     	}
     	return new ResponseDTO<>(data);
     }
+    
+    /* 게시물 조회수 증가 */
+    @PostMapping("/count") 
+    public ResponseDTO<Object> addViewCount(@RequestBody BoardDTO board) throws Exception {
+    	System.out.printf("sysNo: ", board.getSysNo());
+    	int data = boardService.addViewCount(board.getSysNo());
+    	
+    	return new ResponseDTO<>(data);
+    }
+    
+//    @PostMapping("/test-redis") 
+//    public String testRedisConnection() {
+//        return boardService.testRedisConnection();
+//    }
     
  // 게시물 삭제
 //  @GetMapping("/detail")

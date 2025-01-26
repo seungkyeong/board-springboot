@@ -8,6 +8,8 @@
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 //import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.data.redis.core.RedisTemplate;
+//import org.springframework.data.redis.core.ValueOperations;
 //import org.springframework.test.web.servlet.MockMvc;
 //import org.springframework.test.web.servlet.MvcResult;
 //import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -25,6 +27,9 @@
 //	
 //	@Autowired
 //    private MockMvc mockMvc;
+//	
+//	@Autowired
+//    private RedisTemplate<String, String> redisTemplate;
 //
 //	@Test
 //	void contextLoads() {
@@ -38,7 +43,7 @@
 //	/* 게시판 목록 조회 */
 //	@Test
 //	public void getAllBoard() throws Exception {
-//System.out.println("--------------------login Start--------------------");	
+//		System.out.println("--------------------login Start--------------------");	
 //		
 //		//검색 조건 생성
 //		Map<String, String> mapSg = new HashMap<>();
@@ -51,14 +56,14 @@
 //		String json = objectMapper.writeValueAsString(mapSg);
 //		
 //			    
-//	    //검색
+//	    //로그인
 //		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/board/login")
 //						.contentType("application/json") // 요청 본문 타입 지정
 //						.content(json.getBytes())) // JSON 데이터 전달
 //		                .andExpect(status().isOk())
 //		                .andReturn();
 //		
-//		 // 로그인 응답에서 JWT 토큰 추출 (응답 본문에서 추출)
+//		// 로그인 응답에서 JWT 토큰 추출 (응답 본문에서 추출)
 //	    String responseContent = result.getResponse().getContentAsString();
 //	    ObjectMapper responseMapper = new ObjectMapper();
 //	    JsonNode jsonResponse = responseMapper.readTree(responseContent);
@@ -68,36 +73,58 @@
 //	    String jwtToken = jsonResponse.get("data").asText(); // 'data'가 JWT 토큰이 포함된 부분
 //	    System.out.println(jwtToken);
 //        
-//		System.out.println("--------------------login End--------------------");	
-//		
-//		System.out.println("--------------------getAllBoard Start--------------------");	
-//		//검색 조건 생성
-//		Map<String, String> requestParam = new HashMap<>();
-//		requestParam.put("title", "인형");  
-//		requestParam.put("content", "인형");
-//		
-//		SearchDTO search = new SearchDTO();
-//		search.setPageIndex(0);
-//	    search.setPageSize(10);
-//	    search.setSearchList(requestParam);
-//	    
-//	    System.out.println(requestParam);
-//	    System.out.println(search);
-//	    
-//	    // JSON으로 변환
-//	    objectMapper = new ObjectMapper();
-//	    String boardJson = objectMapper.writeValueAsString(search);
-//	    
-//	    //검색
-//		result = mockMvc.perform(MockMvcRequestBuilders.post("/api/board/list")
-//				.header("Authorization", "Bearer " + jwtToken)
-//				.contentType("application/json") // 요청 본문 타입 지정
-//                .content(boardJson)) // JSON 데이터 전달
-//                .andExpect(status().isOk())
-//                .andReturn();
-//		System.out.println(result.getResponse().getContentAsString());
-//		System.out.println("--------------------getAllBoard End--------------------");	
+//		System.out.println("--------------------login End--------------------");
 //	}
+////		
+////		System.out.println("--------------------getAllBoard Start--------------------");	
+////		//검색 조건 생성
+////		Map<String, String> requestParam = new HashMap<>();
+////		requestParam.put("title", "인형");  
+////		requestParam.put("content", "인형");
+////		
+////		SearchDTO search = new SearchDTO();
+////		search.setPageIndex(0);
+////	    search.setPageSize(10);
+////	    search.setSearchList(requestParam);
+////	    
+////	    System.out.println(requestParam);
+////	    System.out.println(search);
+////	    
+////	    // JSON으로 변환
+////	    objectMapper = new ObjectMapper();
+////	    String boardJson = objectMapper.writeValueAsString(search);
+////	    
+////	    //검색
+////		result = mockMvc.perform(MockMvcRequestBuilders.post("/api/board/list")
+////				.header("Authorization", "Bearer " + jwtToken)
+////				.contentType("application/json") // 요청 본문 타입 지정
+////                .content(boardJson)) // JSON 데이터 전달
+////                .andExpect(status().isOk())
+////                .andReturn();
+////		System.out.println(result.getResponse().getContentAsString());
+////		System.out.println("--------------------getAllBoard End--------------------");	
+////	}
+//	
+//	
+//	/* Redis 연결 테스트 */
+////    @Test
+////    public void testRedisConnection() throws Exception {
+////        // Redis에 값 저장
+////        String redisKey = "a";
+////        String redisValue = "testValue";
+////
+////        ValueOperations<String, String> ops = redisTemplate.opsForValue();
+////        ops.set(redisKey, redisValue);
+////
+////        // Redis에서 값 조회
+////        String retrievedValue = ops.get(redisKey);
+////        System.out.println("Retrieved from Redis: " + retrievedValue);
+////
+////        // 값이 올바르게 저장되었는지 확인
+////        assert redisValue.equals(retrievedValue);
+////
+////        System.out.println("--------------------testRedisConnection End--------------------");
+////    }
 ////	
 ////	/* 게시물 생성 */
 ////	@Test
