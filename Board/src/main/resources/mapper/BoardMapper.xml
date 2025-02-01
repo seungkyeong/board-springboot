@@ -41,6 +41,7 @@
         	create_date as createDate,
         	modify_date as modifyDate, 
        		view,
+       		like_count as likeCount,
         	img_path as strImgPath
         FROM board 
         WHERE 1=1
@@ -65,7 +66,15 @@
         		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
-        ORDER BY createDate DESC
+    	<if test="type != null and type == 'allList'">
+        	ORDER BY createDate DESC
+        </if>
+        <if test="type != null and type == 'likeList'">
+        	ORDER BY like_count DESC
+        </if>
+        <if test="type != null and type == 'viewList'">
+        	ORDER BY view DESC
+        </if>
         LIMIT #{pageSize} OFFSET #{pageIndex};
     </select>
     
@@ -142,8 +151,30 @@
 	<update id="syncViewCount" useGeneratedKeys="false">
     	UPDATE board
     	SET
-        	view = #{viewCount},
+        	${type} = #{count},
         	modify_date = now()
     	WHERE system_no = #{sysNo}
 	</update>
+	
+	<insert id="createComment" useGeneratedKeys="false">
+        INSERT 
+        	INTO comment (system_no, parent_system_no, board_system_no, comment, id, user_system_no, create_date, modify_date )
+        	VALUES (REPLACE(UUID(), '-', ''), #{parSysNo}, #{boardSysNo}, #{comment}, #{userId}, #{userSysNo}, now(), now());
+    </insert>
+    
+    <select id="getComment" resultType="dto.CommentDTO" parameterType="dto.SearchDTO">
+        SELECT 
+        	system_no as sysNo,  
+        	parent_system_no as parSysNo, 
+        	board_system_no as boardSysNo, 
+        	comment as comment,
+        	id as userId, 
+       		user_system_no as userSysNo,
+        	create_date as createDate,
+        	modify_date as modifyDate
+        FROM comment 
+        WHERE 1=1
+        AND board_system_no = #{searchList.sysNo}
+        ORDER BY create_date DESC;
+    </select>
 </mapper>

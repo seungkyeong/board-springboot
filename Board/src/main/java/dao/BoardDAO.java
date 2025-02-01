@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import dto.BoardDTO;
+import dto.CommentDTO;
 import dto.SearchDTO;
 import dto.UserDTO;
 
@@ -15,7 +16,9 @@ public interface BoardDAO {
     int createBoard(BoardDTO requestParam) throws Exception; //게시물 생성
     int updateBoard(BoardDTO requestParam) throws Exception; //게시물 수정
     BoardDTO getBoardDetail(SearchDTO requestParam) throws Exception; //게시물 상세 조회
-    int syncViewCount(String sysNo, Long viewCount) throws Exception; //게시물 조회수 업데이트
+    int syncViewCount(Map<String, Object> requestData) throws Exception; //게시물 조회수 업데이트
+    int createComment(CommentDTO requestParam) throws Exception; //댓글 생성
+    List<CommentDTO> getComment(SearchDTO requestParam) throws Exception; //게시물 상세 조회
     
     /* User */
     int createUser(UserDTO requestParam) throws Exception; //회원가입

@@ -1,7 +1,10 @@
 package controller;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import constant.ExceptionConstant;
 import dto.BoardDTO;
+import dto.CommentDTO;
 import dto.ResponseDTO;
 import dto.SearchDTO;
 import exceptionHandle.GeneralException;
@@ -65,7 +69,7 @@ public class BoardController {
     /* 게시물 상세 조회 */
     @PostMapping("/detail") 
     public ResponseDTO<Object> getBoardDetail(@RequestBody SearchDTO search) throws Exception {
-    	BoardDTO data = boardService.getBoardDetail(search);
+    	List<Object> data = boardService.getBoardDetail(search);
     	System.out.println("board");
     	System.out.println(data.toString());
     	
@@ -77,14 +81,42 @@ public class BoardController {
     	return new ResponseDTO<>(data);
     }
     
-    /* 게시물 조회수 증가 */
-    @PostMapping("/count") 
-    public ResponseDTO<Object> addViewCount(@RequestBody BoardDTO board) throws Exception {
-    	System.out.printf("sysNo: ", board.getSysNo());
-    	int data = boardService.addViewCount(board.getSysNo());
+    /* 게시물 조회수, 좋아요 증가 */
+    @PostMapping("/addCount") 
+    public ResponseDTO<Object> addViewCount(@RequestBody Map<String, String> requestData) throws Exception {
+    	System.out.printf("sysNo: ", requestData.get("sysNo"));
+    	int data = boardService.addViewCount(requestData);
     	
     	return new ResponseDTO<>(data);
     }
+    
+    /* 댓글 생성 & 수정 
+     * sysNo 없을 경우 신규 생성,
+     * sysNo 있을 경우 수정*/
+    @PostMapping ("/post/comment") 
+    public ResponseDTO<Object> postComment(@RequestBody CommentDTO comment) throws Exception {
+    	System.out.printf("sysNo: %s\n", comment.getSysNo());
+    	
+    	//게시물 생성 / 수정
+    	int data = boardService.postComment(comment); //성공:1, 실패:0
+
+    	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}else { //게시물 생성 & 수정 성공했을 경우 
+    		
+    	}
+    	return new ResponseDTO<>(data);
+    }
+    
+    /* 게시물 좋아요 증가 */
+//    @PostMapping("/viewCount") 
+//    public ResponseDTO<Object> addLikeCount(@RequestBody BoardDTO board) throws Exception {
+//    	System.out.printf("sysNo: ", board.getSysNo());
+//    	int data = boardService.addViewCount(board.getSysNo());
+//    	
+//    	return new ResponseDTO<>(data);
+//    }
     
 //    @PostMapping("/test-redis") 
 //    public String testRedisConnection() {

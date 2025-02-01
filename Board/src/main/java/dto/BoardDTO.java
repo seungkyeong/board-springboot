@@ -18,6 +18,7 @@ public class BoardDTO {
     private LocalDateTime modifyDate;	// 수정일자
     private String formattedCreateDate;	// 변환 작성일자
     private String formattedModifyDate;	// 변환 수정일자
+    private long likeCount;             //좋아요 수 
     
     // 포맷 정의 (공통 사용)
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -36,6 +37,7 @@ public class BoardDTO {
     	this.strImgPath = "";
     	this.formattedCreateDate = "";
     	this.formattedModifyDate = "";
+    	this.likeCount = 0;
     }
     
     // Getter: 포맷된 날짜 반환
@@ -115,6 +117,12 @@ public class BoardDTO {
 	}
 	public void setStrImgPath(String strImgPath) {
 		this.strImgPath = strImgPath;
+	}
+	public Long getLikeCount() {
+		return likeCount;
+	}
+	public void setLikeCount(Long likeCount) {
+		this.likeCount = likeCount;
 	}
 
 	@Override
