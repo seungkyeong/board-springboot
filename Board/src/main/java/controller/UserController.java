@@ -31,18 +31,15 @@ public class UserController {
       	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
       		System.out.println("Operation Error");
       		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-      	}else { //게시물 생성 & 수정 성공했을 경우 
-  		
       	}
-  		return new ResponseDTO<>(data);
+  		return new ResponseDTO<>();
     }
     
     // 로그인
     @PostMapping("/login")
     public ResponseDTO<Object> login(@RequestBody Map<String, String> loginData) throws Exception {	 
     	String id = loginData.get("id");
-    	String password = loginData.get("password");
-    	 
+    	String password = loginData.get("password");   	 
     	String data = userService.login(id, password); //jwtToken
     	    
     	return new ResponseDTO<>(data);
@@ -87,7 +84,7 @@ public class UserController {
       		System.out.println("Operation Error");
       		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
       	}
-  		return new ResponseDTO<>(data);
+  		return new ResponseDTO<>();
     }
     
     // 비밀번호 변경
@@ -98,8 +95,7 @@ public class UserController {
       		System.out.println("Operation Error");
       		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
       	}
-    	
-    	return new ResponseDTO<>(data);
+    	return new ResponseDTO<>();
     }
 }
 

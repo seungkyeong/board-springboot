@@ -1,10 +1,8 @@
 package controller;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,11 +32,15 @@ public class BoardController {
     @PostMapping("/list")
     public ResponseDTO<Object> getBoardList(@RequestBody SearchDTO search) throws Exception {
     	List<Object> data = boardService.getAllBoardList(search);
-    	return new ResponseDTO<>(data);
+    	if(data.size() <= 0) {
+    		return new ResponseDTO<>();
+    	} else {
+    		return new ResponseDTO<>(data);
+    	}
     }
     
     /* 파일 업로드 */
-    @PostMapping ("/post/file") 
+    @PostMapping ("/post/fileUpload") 
     public List<URL> uploadFile(@RequestParam("files") MultipartFile[] files) throws Exception {
     	//파일 업로드
     	List<URL> fileUrls = boardService.uploadFile(files); //성공:1, 실패:0
@@ -47,10 +49,19 @@ public class BoardController {
         return fileUrls;
     }
     
+    /* 업로드 파일 삭제 */
+    @PostMapping ("/post/fileDelete") 
+    public ResponseDTO<Object> deleteFile(@RequestBody Map<String, List<String>> requestData) throws Exception {
+    	List<String> keys = requestData.get("keys");
+    	
+    	//파일 업로드
+    	return boardService.deleteFiles(keys); //성공:1, 실패:0
+    }
+    
     /* 게시물 생성 & 수정 
      * sysNo 없을 경우 신규 생성,
      * sysNo 있을 경우 수정*/
-    @PostMapping ("/post") //post로 해서 create -> post로 바꾸고 :id있으면 수정으로 할까..?
+    @PostMapping ("/post") 
     public ResponseDTO<Object> postBoard(@RequestBody BoardDTO board) throws Exception {
     	System.out.printf("sysNo: %s\n", board.getSysNo());
     	
@@ -60,10 +71,8 @@ public class BoardController {
     	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
     		System.out.println("Operation Error");
     		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-    	}else { //게시물 생성 & 수정 성공했을 경우 
-    		
     	}
-    	return new ResponseDTO<>(data);
+    	return new ResponseDTO<>();
     }
     
     /* 게시물 상세 조회 */
@@ -74,7 +83,7 @@ public class BoardController {
     	System.out.println(data.toString());
     	
     	//데이터 없을 때 에러 표시 해야 함
-    	if(data == null) {
+    	if(data.size() <= 0) {
     		System.out.println("Data Not Exist");
     		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
     	}
@@ -82,12 +91,15 @@ public class BoardController {
     }
     
     /* 게시물 조회수, 좋아요 증가 */
-    @PostMapping("/addCount") 
-    public ResponseDTO<Object> addViewCount(@RequestBody Map<String, String> requestData) throws Exception {
+    @PostMapping("/updateCount") 
+    public ResponseDTO<Object> updateCount(@RequestBody Map<String, String> requestData) throws Exception {
     	System.out.printf("sysNo: ", requestData.get("sysNo"));
-    	int data = boardService.addViewCount(requestData);
-    	
-    	return new ResponseDTO<>(data);
+    	int data = boardService.updateCount(requestData);
+    	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	return new ResponseDTO<>();
     }
     
     /* 댓글 생성 & 수정 
@@ -103,31 +115,23 @@ public class BoardController {
     	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
     		System.out.println("Operation Error");
     		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-    	}else { //게시물 생성 & 수정 성공했을 경우 
-    		
     	}
-    	return new ResponseDTO<>(data);
+    	return new ResponseDTO<>();
     }
-    
-    /* 게시물 좋아요 증가 */
-//    @PostMapping("/viewCount") 
-//    public ResponseDTO<Object> addLikeCount(@RequestBody BoardDTO board) throws Exception {
-//    	System.out.printf("sysNo: ", board.getSysNo());
-//    	int data = boardService.addViewCount(board.getSysNo());
-//    	
-//    	return new ResponseDTO<>(data);
-//    }
-    
-//    @PostMapping("/test-redis") 
-//    public String testRedisConnection() {
-//        return boardService.testRedisConnection();
-//    }
-    
- // 게시물 삭제
-//  @GetMapping("/detail")
-//  public List<BoardDTO> getBoardDetail() throws Exception {
-//      return boardService.getAllBoardList();
-//  }
+     
+    // 게시물 삭제
+    @PostMapping("post/boardDelete")
+    public ResponseDTO<Object> deleteBoardList(@RequestBody Map<String, List<String>> requestData) throws Exception {
+    	List<String> deleteList = requestData.get("deleteList");
+    	
+    	int data = boardService.deleteBoardList(deleteList);
+    	
+    	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	return new ResponseDTO<>(); 
+    }
 }
 
 

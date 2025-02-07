@@ -1,6 +1,9 @@
 package dto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import constant.ExceptionConstant;
+import jakarta.validation.constraints.AssertFalse.List;
 
 //공통 Response
 public class ResponseDTO<T> {
@@ -9,6 +12,14 @@ public class ResponseDTO<T> {
     private int code;
     private String message;
     private T data;
+    
+    public ResponseDTO() {
+    	this.data = (T) new ArrayList<>();
+    	this.success = true;
+    	this.code = ExceptionConstant.OK.getCode();
+    	this.message = ExceptionConstant.OK.getMessage();
+    	
+    }
     
     public ResponseDTO(T data) {
     	this.data = data;
@@ -19,12 +30,12 @@ public class ResponseDTO<T> {
     }
     
     // 에러 응답 생성자
-    public ResponseDTO(boolean success, int code, String message) {
-        this.success = success;
-        this.code = code;
-        this.message = message;
-        this.data = null;
-    }
+//    public ResponseDTO(boolean success, int code, String message) {
+//        this.success = success;
+//        this.code = code;
+//        this.message = message;
+//        this.data = (data != null) ? data : getDefaultEmptyValue();
+//    }
 
 	public Boolean getSuccess() {
 		return success;

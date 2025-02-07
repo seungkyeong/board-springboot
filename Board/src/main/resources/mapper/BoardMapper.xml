@@ -5,75 +5,121 @@
   
 <mapper namespace="dao.BoardDAO">
 <select id="getAllCountBoardList" parameterType="dto.SearchDTO">
-    	SELECT Count(*) as boardListCount	
-        FROM board 
+    	SELECT Count(DISTINCT T1.system_no) as boardListCount	
+        FROM board AS T1 
+        <if test="type != null and type == 'myLikeList'">
+        	INNER JOIN t_board_like AS T2
+				ON T1.system_no = T2.board_system_no
+			INNER JOIN (
+				SELECT board_system_no, MAX(create_date) AS latest_create_date
+				FROM t_board_like
+				WHERE user_system_no = #{userSysNo}
+				GROUP BY board_system_no
+			) AS T3
+        		ON T2.board_system_no = T3.board_system_no
+				AND T2.create_date = T3.latest_create_date
+        </if>
         WHERE 1=1
         <if test="searchList.title != null and searchList.title != ''">
-        	AND title LIKE CONCAT('%', #{searchList.title}, '%')
+        	AND T1.title LIKE CONCAT('%', #{searchList.title}, '%')
         </if>
         <if test="searchList.content != null and searchList.content != ''">
-        	AND content LIKE CONCAT('%', #{searchList.content}, '%')
+        	AND T1.content LIKE CONCAT('%', #{searchList.content}, '%')
         </if>
         <if test="searchList.userId != null and searchList.userId != ''">
-        	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
+        	AND T1.id LIKE CONCAT('%', #{searchList.userId}, '%')
         </if>
         <if test="searchList.createDate != null and searchList.createDate != ''">
         	<![CDATA[
-        		AND create_date >= #{searchList.createDate}
-        		AND create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
+        		AND T1.create_date >= #{searchList.createDate}
+        		AND T1.create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
     	<if test="searchList.modifyDate != null and searchList.modifyDate != ''">
     		<![CDATA[
-        		AND modify_date >= #{searchList.modifyDate}
-        		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
+        		AND T1.modify_date >= #{searchList.modifyDate}
+        		AND T1.modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
+    	<if test="type != null and type == 'myBoardList'">
+        	AND T1.user_system_no = #{userSysNo}
+        </if>
+        <if test="type != null and type == 'myLikeList'">
+        	AND T2.user_system_no = #{userSysNo}
+       		AND T2.action = 'Increase'
+        </if>
         </select>
 
 
     <select id="getAllBoardList" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
     	SELECT 
-       		system_no as sysNo, 
-       		title, content, 
-       		id as userId, 
-       		user_system_no as userSysNo,
-        	create_date as createDate,
-        	modify_date as modifyDate, 
-       		view,
-       		like_count as likeCount,
-        	img_path as strImgPath
-        FROM board 
+       		DISTINCT T1.system_no as sysNo, 
+       		T1.title, content, 
+       		T1.id as userId, 
+       		T1.user_system_no as userSysNo,
+        	T1.modify_date as modifyDate, 
+       		T1.view,
+       		T1.like_count as likeCount,
+        	T1.img_path as strImgPath,
+        	<if test="type != null and type == 'myLikeList'">
+        		T2.create_date as createDate
+        	</if>
+        	<if test="type != null and type != 'myLikeList'">
+        		T1.create_date as createDate
+        	</if>
+        FROM board AS T1
+        <if test="type != null and type == 'myLikeList'">
+        	INNER JOIN t_board_like AS T2
+				ON T1.system_no = T2.board_system_no
+			INNER JOIN (
+				SELECT board_system_no, MAX(create_date) AS latest_create_date
+				FROM t_board_like
+				WHERE user_system_no = #{userSysNo}
+				GROUP BY board_system_no
+			) AS T3
+        		ON T2.board_system_no = T3.board_system_no
+				AND T2.create_date = T3.latest_create_date
+        </if>
         WHERE 1=1
         <if test="searchList.title != null and searchList.title != ''">
-        	AND title LIKE CONCAT('%', #{searchList.title}, '%')
+        	AND T1.title LIKE CONCAT('%', #{searchList.title}, '%')
         </if>
         <if test="searchList.content != null and searchList.content != ''">
-        	AND content LIKE CONCAT('%', #{searchList.content}, '%')
+        	AND T1.content LIKE CONCAT('%', #{searchList.content}, '%')
         </if>
         <if test="searchList.userId != null and searchList.userId != ''">
-        	AND id LIKE CONCAT('%', #{searchList.userId}, '%')
+        	AND T1.id LIKE CONCAT('%', #{searchList.userId}, '%')
         </if>
         <if test="searchList.createDate != null and searchList.createDate != ''">
         	<![CDATA[
-        		AND create_date >= #{searchList.createDate}
-        		AND create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
+        		AND T1.create_date >= #{searchList.createDate}
+        		AND T1.create_date <= DATE_ADD(#{searchList.createDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
     	<if test="searchList.modifyDate != null and searchList.modifyDate != ''">
     		<![CDATA[
-        		AND modify_date >= #{searchList.modifyDate}
-        		AND modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
+        		AND T1.modify_date >= #{searchList.modifyDate}
+        		AND T1.modify_date < DATE_ADD(#{searchList.modifyDate}, INTERVAL 1 DAY)
         	]]>
     	</if>
-    	<if test="type != null and type == 'allList'">
-        	ORDER BY createDate DESC
+    	<if test="type != null and type == 'myBoardList'">
+        	AND T1.user_system_no = #{userSysNo}
+        </if>
+        <if test="type != null and type == 'myLikeList'">
+        	AND T2.user_system_no = #{userSysNo}
+       		AND T2.action = 'Increase'
+        </if>
+    	<if test="type != null and (type == 'allList' or type == 'myBoardList')">
+        	ORDER BY T1.create_date DESC
         </if>
         <if test="type != null and type == 'likeList'">
-        	ORDER BY like_count DESC
+        	ORDER BY T1.like_count DESC
         </if>
         <if test="type != null and type == 'viewList'">
-        	ORDER BY view DESC
+        	ORDER BY T1.view DESC
+        </if>
+        <if test="type != null and type == 'myLikeList'">
+        	ORDER BY T2.create_date DESC
         </if>
         LIMIT #{pageSize} OFFSET #{pageIndex};
     </select>
@@ -98,16 +144,25 @@
     
     <select id="getBoardDetail" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
         SELECT 
-        	system_no as sysNo,  
-        	title, content, 
-        	id as userId, 
-        	user_system_no as userSysNo,
-        	create_date as createDate,
-        	modify_date as modifyDate, 
-        	view,
-        	img_path as strImgPath
-        FROM board 
-        WHERE system_no = #{searchList.sysNo};
+        	T1.system_no as sysNo,  
+        	T1.title, content, 
+        	T1.id as userId, 
+        	T1.user_system_no as userSysNo,
+        	T1.create_date as createDate,
+        	T1.modify_date as modifyDate, 
+        	T1.view,
+        	T1.img_path as strImgPath,
+        	CASE 
+				WHEN T2.system_no IS NOT NULL THEN T2.action
+ 					ELSE 'none'
+ 			END AS likeFlag
+        FROM board AS T1
+        LEFT OUTER JOIN t_board_like AS T2
+        	ON T2.board_system_no = #{searchList.sysNo}
+        	AND T2.user_system_no = #{userSysNo}
+        WHERE T1.system_no = #{searchList.sysNo}
+        ORDER BY T2.create_date DESC
+        LIMIT 1;
     </select>
     
     <insert id="createUser" useGeneratedKeys="false">
@@ -148,7 +203,7 @@
     	WHERE system_no = #{sysNo}
 	</update>
 	
-	<update id="syncViewCount" useGeneratedKeys="false">
+	<update id="syncCount" useGeneratedKeys="false">
     	UPDATE board
     	SET
         	${type} = #{count},
@@ -177,4 +232,18 @@
         AND board_system_no = #{searchList.sysNo}
         ORDER BY create_date DESC;
     </select>
+    
+    <insert id="createLikeLog" parameterType="hashMap">
+        INSERT 
+        	INTO t_board_like (system_no, title, id, user_system_no, create_date, modify_date, board_system_no, action )
+        	VALUES (REPLACE(UUID(), '-', ''), #{title}, #{userId}, #{userSysNo}, now(), now(), #{sysNo}, #{action});
+    </insert>
+    
+    <delete id="deleteBoardList" parameterType="java.util.List">
+    	DELETE FROM board
+    	WHERE system_no IN 
+    	<foreach item="item" collection="requestParam" open="(" close=")" separator=",">
+        	#{item}
+    	</foreach>
+	</delete>
 </mapper>

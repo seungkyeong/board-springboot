@@ -10,7 +10,6 @@ public class ErrorResponseDTO<T> {
     	this.success = false;
     	this.code = code;
     	this.message = message;
-    	
     }
 
 	public Boolean getSuccess() {

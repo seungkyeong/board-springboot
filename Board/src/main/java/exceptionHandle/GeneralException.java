@@ -1,5 +1,7 @@
 package exceptionHandle;
 
+import java.util.Collections;
+
 import constant.ExceptionConstant;
 
 public class GeneralException extends RuntimeException {

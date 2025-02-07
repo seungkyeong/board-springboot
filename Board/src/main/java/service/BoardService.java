@@ -16,6 +16,7 @@ import aws.S3Service;
 import dao.BoardDAO;
 import dto.BoardDTO;
 import dto.CommentDTO;
+import dto.ResponseDTO;
 import dto.SearchDTO;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -99,6 +100,11 @@ public class BoardService {
         return fileUrls;
     }
     
+    /* 업로드 파일 삭제 */ 
+    public ResponseDTO<Object> deleteFiles(List<String> keys) throws Exception{
+    	return S3service.deleteFiles(keys);
+    }
+    
     /* 게시물 생성 & 수정 */ 
     public int postBoard(BoardDTO requestParam) throws Exception{
     	//strImgPath 넣기
@@ -152,37 +158,53 @@ public class BoardService {
         return data;
     }
     
-    /* 게시물 조회수 증가 */ 
-    public int addViewCount(Map<String, String> requestData) throws Exception{  
+    /* 게시물 조회수/좋아요 수 증가 */ 
+    public int updateCount(Map<String, String> requestData) throws Exception{  
     	//redis에 1 증가
     	String redisKey = "count:" + requestData.get("type") + ":" + requestData.get("sysNo");
-    	redisTemplate.opsForValue().increment(redisKey, 1);
+    	if(requestData.get("action").equals("Increase")) {
+    		System.out.printf("---------increase action: %s \n", requestData.get("action"));
+    		redisTemplate.opsForValue().increment(redisKey, 1);
+    	}else {
+    		System.out.printf("---------decrease action: %s \n", requestData.get("action"));
+    		redisTemplate.opsForValue().decrement(redisKey, 1);
+    	}
     	
     	//view 값 가져오기
     	ValueOperations<String, Long> ops = redisTemplate.opsForValue();
-    	Long viewCount = ops.get(redisKey);
+    	Long Count = ops.get(redisKey);
     	
     	//expire redis 세팅 & ttl 세팅
     	String redisExpiredKey = "expired:" + requestData.get("type") + ":" + requestData.get("sysNo");
-    	ops.set(redisExpiredKey, viewCount, 1, TimeUnit.MINUTES);
+    	ops.set(redisExpiredKey, Count, 1, TimeUnit.MINUTES);
+    	
+    	//좋아요 로그 
+    	if(requestData.get("type").equals("like")) {
+    		Boarddao.createLikeLog(requestData);
+    	}
     	
         return 1; 
     }
     
     /* 게시물 조회수 1분마다 DB에 반영 */
-    public void syncViewCount(Map<String, Object> requestData) throws Exception{
+    public void syncCount(Map<String, Object> requestData) throws Exception{
     	System.out.printf("requestData.get(\"type\") 결과: %s", requestData.get("type")=="like");
     	if("like".equals(requestData.get("type"))) {
     		requestData.put("type", "like_count");
     	}
     	
     	// DB에 조회수 반영
-        int data = Boarddao.syncViewCount(requestData);
+        int data = Boarddao.syncCount(requestData);
     }
     
     /* 댓글 생성 & 수정 */ 
     public int postComment(CommentDTO requestParam) throws Exception{
         return Boarddao.createComment(requestParam);
+    }
+    
+    /* 게시물 다중 삭제 */ 
+    public int deleteBoardList(List<String> requestParam) throws Exception{
+        return Boarddao.deleteBoardList(requestParam);
     }
     
 //    public String testRedisConnection() {

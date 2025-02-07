@@ -19,6 +19,7 @@ public class BoardDTO {
     private String formattedCreateDate;	// 변환 작성일자
     private String formattedModifyDate;	// 변환 수정일자
     private long likeCount;             //좋아요 수 
+    private String likeFlag;            //사용자의 좋아요 누른 판별..?
     
     // 포맷 정의 (공통 사용)
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -38,6 +39,7 @@ public class BoardDTO {
     	this.formattedCreateDate = "";
     	this.formattedModifyDate = "";
     	this.likeCount = 0;
+    	this.likeFlag = "";
     }
     
     // Getter: 포맷된 날짜 반환
@@ -123,6 +125,12 @@ public class BoardDTO {
 	}
 	public void setLikeCount(Long likeCount) {
 		this.likeCount = likeCount;
+	}
+	public String getLikeFlag() {
+		return likeFlag;
+	}
+	public void setLikeFlag(String likeFlag) {
+		this.likeFlag = likeFlag;
 	}
 
 	@Override

@@ -9,18 +9,24 @@ public class SearchDTO {
     private int pageSize;	
     private Map<String, String> searchList;	
     private int countFlag; //count flag
+    private String userId;
+    private String userSysNo;
     
     public SearchDTO() {
     	this.pageIndex = 0;
     	this.pageSize = 10;
     	this.searchList = new HashMap<>();
+    	this.userId = "";
+    	this.userSysNo = "";
     }
     
-    public SearchDTO(int pageIndex, int pageSize, Map<String, String> searchList, String type) {
+    public SearchDTO(int pageIndex, int pageSize, Map<String, String> searchList, String type, String userId, String userSysNo) {
     	this.pageIndex = pageIndex;
     	this.pageSize = pageSize;
     	this.searchList = searchList;
     	this.type = type;
+    	this.userId = userId;
+    	this.userSysNo = userSysNo;
     }
 
 	public int getPageIndex() {
@@ -61,6 +67,22 @@ public class SearchDTO {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	
+	public String getUserSysNo() {
+		return userSysNo;
+	}
+
+	public void setUserSysNo(String userSysNo) {
+		this.userSysNo = userSysNo;
 	}
 }
 

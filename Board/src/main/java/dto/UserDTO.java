@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class UserDTO {
-    private String sysNo;				//게시물 System No
+    private String sysNo;				//사용자 System No
     private String id;				// 제목
     private String password;				// 내용
     private String name;				// 작성자 ID
