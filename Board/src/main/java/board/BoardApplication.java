@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication 
 @MapperScan(basePackages = "dao") // BoardDAO의 패키지 경로 설정 
-@ComponentScan(basePackages = {"board", "controller", "service", "dao", "dto", "configuration", "exceptionHandle", "constant", "aws", "util", "redisHandle"}) 
+@ComponentScan(basePackages = {"board", "controller", "service", "dao", "dto", "configuration", "exceptionHandle", "constant", "aws", "util", "redisHandle", "ebSocketHandle"}) 
 public class BoardApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BoardApplication.class, args);

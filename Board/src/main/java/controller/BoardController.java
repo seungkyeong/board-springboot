@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import constant.ExceptionConstant;
 import dto.BoardDTO;
 import dto.CommentDTO;
+import dto.NotificationDTO;
 import dto.ResponseDTO;
 import dto.SearchDTO;
 import exceptionHandle.GeneralException;
@@ -92,7 +93,7 @@ public class BoardController {
     
     /* 게시물 조회수, 좋아요 증가 */
     @PostMapping("/updateCount") 
-    public ResponseDTO<Object> updateCount(@RequestBody Map<String, String> requestData) throws Exception {
+    public ResponseDTO<Object> updateCount(@RequestBody Map<String, Object> requestData) throws Exception {
     	System.out.printf("sysNo: ", requestData.get("sysNo"));
     	int data = boardService.updateCount(requestData);
     	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
@@ -105,7 +106,7 @@ public class BoardController {
     /* 댓글 생성 & 수정 
      * sysNo 없을 경우 신규 생성,
      * sysNo 있을 경우 수정*/
-    @PostMapping ("/post/comment") 
+    @PostMapping ("/comment") 
     public ResponseDTO<Object> postComment(@RequestBody CommentDTO comment) throws Exception {
     	System.out.printf("sysNo: %s\n", comment.getSysNo());
     	
@@ -120,17 +121,53 @@ public class BoardController {
     }
      
     // 게시물 삭제
-    @PostMapping("post/boardDelete")
-    public ResponseDTO<Object> deleteBoardList(@RequestBody Map<String, List<String>> requestData) throws Exception {
-    	List<String> deleteList = requestData.get("deleteList");
+    @PostMapping("boardDelete")
+    public ResponseDTO<Object> deleteBoardList(@RequestBody Map<String, Object> requestData) throws Exception {
+    	int data = boardService.deleteBoardList(requestData);
     	
-    	int data = boardService.deleteBoardList(deleteList);
+    	if(data == 0) { //게시물 삭제 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	return new ResponseDTO<>(); 
+    }
+    
+    // 좋아요 삭제
+    @PostMapping("likeDelete")
+    public ResponseDTO<Object> deleteLikeList(@RequestBody Map<String, Object> requestData) throws Exception {
+//    	List<String> deleteList = (List<String>)requestData.get("deleteList");
+    	
+    	int data = boardService.deleteLikeList(requestData);
     	
     	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
     		System.out.println("Operation Error");
     		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
     	}
     	return new ResponseDTO<>(); 
+    }
+    
+    // 알림 조회
+    @PostMapping("notiList")
+    public ResponseDTO<Object> getNotiList(@RequestBody NotificationDTO requestData) throws Exception {
+    	List<NotificationDTO> data = boardService.getNotiList(requestData);
+    	
+    	if(data.size() < 0) { //게시물 생성 & 수정 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	return new ResponseDTO<>(data); 
+    }
+    
+    // 알림 Flag 업데이트
+    @PostMapping("update/notiList")
+    public ResponseDTO<Object> updateNotiReadFlag(@RequestBody NotificationDTO requestData) throws Exception {
+    	int data = boardService.updateNotiReadFlag(requestData);
+    	
+    	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	return new ResponseDTO<>(data); 
     }
 }
 

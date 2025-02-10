@@ -54,7 +54,7 @@
     <select id="getAllBoardList" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
     	SELECT 
        		DISTINCT T1.system_no as sysNo, 
-       		T1.title, content, 
+       		T1.title, T1.content, 
        		T1.id as userId, 
        		T1.user_system_no as userSysNo,
         	T1.modify_date as modifyDate, 
@@ -145,7 +145,7 @@
     <select id="getBoardDetail" resultType="dto.BoardDTO" parameterType="dto.SearchDTO">
         SELECT 
         	T1.system_no as sysNo,  
-        	T1.title, content, 
+        	T1.title, T1.content, 
         	T1.id as userId, 
         	T1.user_system_no as userSysNo,
         	T1.create_date as createDate,
@@ -235,15 +235,67 @@
     
     <insert id="createLikeLog" parameterType="hashMap">
         INSERT 
-        	INTO t_board_like (system_no, title, id, user_system_no, create_date, modify_date, board_system_no, action )
-        	VALUES (REPLACE(UUID(), '-', ''), #{title}, #{userId}, #{userSysNo}, now(), now(), #{sysNo}, #{action});
+        	INTO t_board_like (system_no, id, user_system_no, create_date, modify_date, board_system_no, action )
+        	VALUES (REPLACE(UUID(), '-', ''), #{userId}, #{userSysNo}, now(), now(), #{sysNo}, #{action});
     </insert>
     
-    <delete id="deleteBoardList" parameterType="java.util.List">
+    <delete id="deleteBoardList" parameterType="hashMap">
     	DELETE FROM board
     	WHERE system_no IN 
-    	<foreach item="item" collection="requestParam" open="(" close=")" separator=",">
+    	<foreach item="item" collection="deleteList" open="(" close=")" separator=",">
         	#{item}
     	</foreach>
 	</delete>
+	
+	<insert id="saveNotification" parameterType="dto.NotificationDTO">
+        INSERT 
+        	INTO notification (system_no, id, user_system_no, board_system_no, title, message, read_flag, create_date, modify_date )
+        	VALUES (REPLACE(UUID(), '-', ''), #{userId}, #{userSysNo}, #{boardSysNo}, #{title}, #{message}, #{readFlag}, now(), now());
+    </insert>
+    
+    <delete id="deleteLikeList" parameterType="hashMap">
+    	DELETE FROM t_board_like
+    	WHERE 1=1
+    	<if test="type != null and type == 'like'">
+    		AND user_system_no = #{userSysNo}
+    	</if>
+    	AND board_system_no IN 
+    	<foreach item="item" collection="deleteList" open="(" close=")" separator=",">
+        	#{item}
+    	</foreach>
+	</delete>
+	
+	<delete id="deleteCommentList" parameterType="hashMap">
+    	DELETE FROM comment
+    	WHERE board_system_no IN 
+    	<foreach item="item" collection="deleteList" open="(" close=")" separator=",">
+        	#{item}
+    	</foreach>
+	</delete>
+	
+	<select id="getNotiList" resultType="dto.NotificationDTO" parameterType="dto.NotificationDTO">
+        SELECT 
+        	system_no as sysNo,  
+        	id as userId, 
+        	user_system_no as userSysNo, 
+        	message as message,
+        	board_system_no as boardSysNo,
+        	title as title,
+        	create_date as createDate,
+        	modify_date as modifyDate,
+        	read_flag as readFlag
+        FROM notification 
+        WHERE 1=1
+        AND user_system_no = #{userSysNo}
+        ORDER BY create_date DESC;
+     </select>
+     
+     <update id="updateNotiReadFlag" useGeneratedKeys="false">
+        UPDATE notification
+        SET read_flag = true,
+        	modify_date = now()
+        WHERE system_no = #{sysNo}
+        AND user_system_no = #{userSysNo}
+        AND board_system_no = #{boardSysNo}
+     </update>
 </mapper>

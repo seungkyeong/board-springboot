@@ -9,15 +9,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import aws.S3Service;
+import constant.ExceptionConstant;
 import dao.BoardDAO;
 import dto.BoardDTO;
 import dto.CommentDTO;
+import dto.NotificationDTO;
 import dto.ResponseDTO;
 import dto.SearchDTO;
+import exceptionHandle.GeneralException;
+import webSocketHandle.NotificationWebSocketHandler;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -29,21 +37,26 @@ public class BoardService {
 	private final S3Service S3service;
 	@Autowired
     private RedisTemplate<String, Long> redisTemplate;
+	@Autowired
+	private final NotificationWebSocketHandler notificationWebSocketHandler;
+	@Autowired                     
+	private final NotificationService NotificationService;
+	@Autowired
+    private SqlSession sqlSession;
 	
 
-    public BoardService(BoardDAO Boarddao, S3Service S3service) { 
+    public BoardService(BoardDAO Boarddao, S3Service S3service,@Lazy NotificationWebSocketHandler notificationWebSocketHandler, NotificationService NotificationService) { 
         this.Boarddao = Boarddao;
         this.S3service = S3service;
+        this.notificationWebSocketHandler = notificationWebSocketHandler;
+        this.NotificationService = NotificationService;
     }
 
     /* 게시판 목록 조회 */ 
     public List<Object> getAllBoardList(SearchDTO search) throws Exception{
-    	System.out.printf("************boardList: %s", search.getType());
-    	
     	//Count 조회
     	search.setCountFlag(1);
     	int BoardListCount = Boarddao.getAllCountBoardList(search);
-    	System.out.println("boardList select finish");
     	
     	//10개씩 조회
     	search.setCountFlag(0);
@@ -159,14 +172,12 @@ public class BoardService {
     }
     
     /* 게시물 조회수/좋아요 수 증가 */ 
-    public int updateCount(Map<String, String> requestData) throws Exception{  
+    public int updateCount(Map<String, Object> requestData) throws Exception{  
     	//redis에 1 증가
     	String redisKey = "count:" + requestData.get("type") + ":" + requestData.get("sysNo");
     	if(requestData.get("action").equals("Increase")) {
-    		System.out.printf("---------increase action: %s \n", requestData.get("action"));
     		redisTemplate.opsForValue().increment(redisKey, 1);
     	}else {
-    		System.out.printf("---------decrease action: %s \n", requestData.get("action"));
     		redisTemplate.opsForValue().decrement(redisKey, 1);
     	}
     	
@@ -199,12 +210,93 @@ public class BoardService {
     
     /* 댓글 생성 & 수정 */ 
     public int postComment(CommentDTO requestParam) throws Exception{
-        return Boarddao.createComment(requestParam);
+    	//게시물 작성자 SysNo
+    	String boardCreaterSysNo = requestParam.getBoardCreaterSysNo();
+    	//댓글 작성자 SysNo
+    	String commentCreaterSysNo = requestParam.getUserSysNo();
+    	
+    	//댓글 생성
+    	int data = Boarddao.createComment(requestParam);
+    	
+    	if(data == 0) { //실패했을 경우
+    		System.out.println("Operation Error");
+    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+    	}
+    	//게시글 작성자 조회 (DB에서 가져오기)
+        if (!boardCreaterSysNo.equals(commentCreaterSysNo)) { // 본인 댓글이면 알림 X
+        	System.out.println("------------본인 댓글 아님");
+        	
+        	// 알림 저장
+        	String message = "게시글에 새로운 댓글이 달렸습니다!";
+        	data = NotificationService.saveNotification(requestParam.getBoardCreater(), boardCreaterSysNo, requestParam.getBoardSysNo(), message, requestParam.getTitle());
+           
+        	//알림 보내기
+        	notificationWebSocketHandler.sendNotification(boardCreaterSysNo, "게시글에 새로운 댓글이 달렸습니다!");
+        }
+        return data;
     }
     
     /* 게시물 다중 삭제 */ 
-    public int deleteBoardList(List<String> requestParam) throws Exception{
-        return Boarddao.deleteBoardList(requestParam);
+    public int deleteBoardList(Map<String, Object> requestParam) throws Exception{
+    	// 트랜잭션 시작 (예제에서는 MyBatis 사용)
+//        sqlSession.getConnection().setAutoCommit(false);
+        
+    	//게시물 삭제
+        int data = Boarddao.deleteBoardList(requestParam);
+        
+        if(data == 0) {
+        	throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+        }
+        
+        //게시물 Comment 삭제
+        data = Boarddao.deleteCommentList(requestParam);
+        
+        if(data == 0) {
+        	throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
+        }
+        
+        //게시물 좋아요 List 삭제
+        data = Boarddao.deleteLikeList(requestParam);
+        //Redis 삭제
+        List<String> deleteList = (List<String>)requestParam.get("deleteList");
+        if (deleteList != null) {
+            for (String sysNo : deleteList) {
+                String redisLikeKey = "count:like:" + sysNo; // Redis 키 생성
+                String redisViewKey = "count:view:" + sysNo; // Redis 키 생성
+                redisTemplate.delete(redisLikeKey); // Redis에서 삭제
+                redisTemplate.delete(redisViewKey); // Redis에서 삭제
+            }
+        }
+        	
+        // 모든 삭제가 정상적으로 수행되면 커밋
+//        sqlSession.getConnection().commit();
+            
+    	return data;
+    }
+    
+    /* 좋아요 다중 삭제 */ 
+    public int deleteLikeList(Map<String, Object> requestParam) throws Exception{
+    	//게시물 좋아요 List 삭제
+    	int data = Boarddao.deleteLikeList(requestParam);
+    	//좋아요 Redis 1 감소
+    	 List<String> deleteList = (List<String>)requestParam.get("deleteList");
+         if (deleteList != null) {
+             for (String sysNo : deleteList) {
+            	 requestParam.put("sysNo", sysNo);
+            	 data = updateCount(requestParam);
+             }
+         }
+    	return data;
+    }
+    
+    /* 알림 조회 */ 
+    public List<NotificationDTO> getNotiList(NotificationDTO requestParam) throws Exception{
+    	return Boarddao.getNotiList(requestParam); 
+    }
+    
+    /* 알림 Flag 업데이트 */ 
+    public int updateNotiReadFlag(NotificationDTO requestParam) throws Exception{
+    	return Boarddao.updateNotiReadFlag(requestParam); 
     }
     
 //    public String testRedisConnection() {
