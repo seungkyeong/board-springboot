@@ -3,6 +3,8 @@ package controller;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,9 +13,10 @@ import constant.ExceptionConstant;
 import dto.ResponseDTO;
 import dto.UserDTO;
 import exceptionHandle.GeneralException;
+import jakarta.servlet.http.HttpServletResponse;
 import service.UserService;
 
-@RestController //RESTful API를 작성하기 위한 어노테이션 
+@RestController 
 @RequestMapping("/api/board")
 public class UserController {
 	@Autowired
@@ -25,23 +28,24 @@ public class UserController {
     
     // 회원가입
     @PostMapping("/signUp")
-    public ResponseDTO<Object> postUser(@RequestBody UserDTO user) throws Exception {
+    public ResponseEntity<ResponseDTO<Object>> postUser(@RequestBody UserDTO user) throws Exception {
     	int data = userService.postUser(user);
       
       	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
       		System.out.println("Operation Error");
       		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
       	}
-  		return new ResponseDTO<>();
+      	
+  		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO<>());
     }
     
     // 로그인
     @PostMapping("/login")
-    public ResponseDTO<Object> login(@RequestBody Map<String, String> loginData) throws Exception {	 
+    public ResponseDTO<Object> login(@RequestBody Map<String, String> loginData, HttpServletResponse response) throws Exception {	 
     	String id = loginData.get("id");
     	String password = loginData.get("password");   	 
-    	String data = userService.login(id, password); //jwtToken
-    	    
+    	Map<String, String> data = userService.login(id, password, response); //jwtToken
+		
     	return new ResponseDTO<>(data);
     }
     

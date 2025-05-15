@@ -9,14 +9,25 @@ public class JwtUtil {
 
     private static final String SECRET_KEY = "secretUserTokenKey";
 
-    // JWT 생성
-    public static String generateToken(String userId, String sysNo) {
+    // AccessToken 생성
+    public static String generateAccessToken(String userId, String sysNo) {
     	String subject = userId + ":" + sysNo;
     	
     	return JWT.create()
                 .withSubject(subject)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3600000)) // 1시간 후 만료
+                .withExpiresAt(new Date(System.currentTimeMillis() + 600000)) // 5분 후 만료
+                .sign(Algorithm.HMAC256(SECRET_KEY)); // 서명
+    }
+    
+    //RefreshToken 생성
+    public static String generateRefreshToken(String userId, String sysNo) {
+    	String subject = userId + ":" + sysNo;
+    	
+    	return JWT.create()
+                .withSubject(subject)
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + 86400000)) // 1일 후 만료
                 .sign(Algorithm.HMAC256(SECRET_KEY)); // 서명
     }
 

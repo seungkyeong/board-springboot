@@ -238,25 +238,19 @@ public class BoardService {
     
     /* 게시물 다중 삭제 */ 
     public int deleteBoardList(Map<String, Object> requestParam) throws Exception{
-    	// 트랜잭션 시작 (예제에서는 MyBatis 사용)
-//        sqlSession.getConnection().setAutoCommit(false);
-        
     	//게시물 삭제
         int data = Boarddao.deleteBoardList(requestParam);
         
         if(data == 0) {
+        	System.out.println("deleteBoardList finish");
         	throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
         }
         
         //게시물 Comment 삭제
-        data = Boarddao.deleteCommentList(requestParam);
-        
-        if(data == 0) {
-        	throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-        }
+        Boarddao.deleteCommentList(requestParam);
         
         //게시물 좋아요 List 삭제
-        data = Boarddao.deleteLikeList(requestParam);
+        Boarddao.deleteLikeList(requestParam);
         //Redis 삭제
         List<String> deleteList = (List<String>)requestParam.get("deleteList");
         if (deleteList != null) {
@@ -266,11 +260,7 @@ public class BoardService {
                 redisTemplate.delete(redisLikeKey); // Redis에서 삭제
                 redisTemplate.delete(redisViewKey); // Redis에서 삭제
             }
-        }
-        	
-        // 모든 삭제가 정상적으로 수행되면 커밋
-//        sqlSession.getConnection().commit();
-            
+        }  
     	return data;
     }
     

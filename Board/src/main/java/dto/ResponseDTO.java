@@ -1,71 +1,37 @@
 package dto;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import constant.ExceptionConstant;
-import jakarta.validation.constraints.AssertFalse.List;
+import lombok.Getter;
+import lombok.Setter;
 
 //공통 Response
+@Getter @Setter
 public class ResponseDTO<T> {
 
-    private Boolean success;
-    private int code;
-    private String message;
-    private T data;
+    private Boolean success;	//성공 여부
+    private int code;			//에러 코드(성공: 0)
+    private String message;		//에러 메시지(성공: "")
+    private T data; 			//반환 데이터
+        
     
     public ResponseDTO() {
-    	this.data = (T) new ArrayList<>();
     	this.success = true;
-    	this.code = ExceptionConstant.OK.getCode();
-    	this.message = ExceptionConstant.OK.getMessage();
-    	
+    	this.code = 0;
+    	this.message = "";
+    	this.data = (T) new ArrayList<>();
     }
     
     public ResponseDTO(T data) {
-    	this.data = data;
     	this.success = true;
-    	this.code = ExceptionConstant.OK.getCode();
-    	this.message = ExceptionConstant.OK.getMessage();
-    	
+    	this.code = 0;
+    	this.message = "";
+    	this.data = data;
     }
     
-    // 에러 응답 생성자
-//    public ResponseDTO(boolean success, int code, String message) {
-//        this.success = success;
-//        this.code = code;
-//        this.message = message;
-//        this.data = (data != null) ? data : getDefaultEmptyValue();
-//    }
-
-	public Boolean getSuccess() {
-		return success;
-	}
-
-	public void setSuccess(Boolean success) {
-		this.success = success;
-	}
-
-	public int getCode() {
-		return code;
-	}
-
-	public void setCode(int code) {
-		this.code = code;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public T getData() {
-		return data;
-	}
-
-	public void setData(T data) {
-		this.data = data;
-	}
+    public ResponseDTO(int code, String message) {
+    	this.success = false;
+    	this.code = code;
+    	this.message = message;
+    	this.data = (T) new ArrayList<>();
+    }
 }

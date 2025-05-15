@@ -19,7 +19,7 @@ import dto.SearchDTO;
 import exceptionHandle.GeneralException;
 import service.BoardService;
 
-@RestController //RESTful API를 작성하기 위한 어노테이션 
+@RestController
 @RequestMapping("/api/board") 
 public class BoardController {
 	@Autowired
@@ -135,8 +135,6 @@ public class BoardController {
     // 좋아요 삭제
     @PostMapping("likeDelete")
     public ResponseDTO<Object> deleteLikeList(@RequestBody Map<String, Object> requestData) throws Exception {
-//    	List<String> deleteList = (List<String>)requestData.get("deleteList");
-    	
     	int data = boardService.deleteLikeList(requestData);
     	
     	if(data == 0) { //게시물 생성 & 수정 실패했을 경우

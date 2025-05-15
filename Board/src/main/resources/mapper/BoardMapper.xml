@@ -249,8 +249,8 @@
 	
 	<insert id="saveNotification" parameterType="dto.NotificationDTO">
         INSERT 
-        	INTO notification (system_no, id, user_system_no, board_system_no, title, message, read_flag, create_date, modify_date )
-        	VALUES (REPLACE(UUID(), '-', ''), #{userId}, #{userSysNo}, #{boardSysNo}, #{title}, #{message}, #{readFlag}, now(), now());
+        	INTO notification (system_no, id, user_system_no, board_system_no, title, read_flag, create_date, modify_date )
+        	VALUES (REPLACE(UUID(), '-', ''), #{userId}, #{userSysNo}, #{boardSysNo}, #{title}, #{readFlag}, now(), now());
     </insert>
     
     <delete id="deleteLikeList" parameterType="hashMap">
