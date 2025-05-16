@@ -7,7 +7,6 @@ import lombok.Setter;
 //공통 Response
 @Getter @Setter
 public class ResponseDTO<T> {
-
     private Boolean success;	//성공 여부
     private int code;			//에러 코드(성공: 0)
     private String message;		//에러 메시지(성공: "")

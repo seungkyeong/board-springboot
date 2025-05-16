@@ -1,155 +1,118 @@
 package service;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import constant.ExceptionConstant;
-import dao.BoardDAO;
 import dto.UserDTO;
+import entity.User;
 import exceptionHandle.GeneralException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import repository.UserRepository;
 import util.JwtUtil;
 
+@RequiredArgsConstructor
 @Service
 public class UserService {
-	@Autowired                     
-	private final BoardDAO Boarddao;
-	@Autowired
-    private RedisTemplate<String, String> redisTemplate;
+	private final UserRepository userRepository;
 	
-
-    public UserService(BoardDAO Boarddao) { 
-        this.Boarddao = Boarddao;
-    }
-    
     /* 회원가입 */ 
-    public int postUser(UserDTO user) throws Exception{
-    	Map<String, String> requestData = new HashMap<String, String>();
-    	requestData.put("key", "id");
-    	requestData.put("value", user.getId());
-   	 	System.out.println("user.getSysno(): " + user.getSysNo());
-        if(user.getSysNo() == null) { //신규 생성인 경우 ==
-        	//id 중복 체크
-        	List<UserDTO> data = Boarddao.checkUser(requestData);
-        	if(data.size() > 0) { //중복인 경우 //AlreadyExistsException
-        		throw new GeneralException(ExceptionConstant.ALREADY_EXIST_ID.getCode(), ExceptionConstant.ALREADY_EXIST_ID.getMessage());
-        	}
-        	//email 중복 체크
-        	requestData.put("key", "email");
-        	requestData.put("value", user.getEmail());
-        	data = Boarddao.checkUser(requestData);
-        	if(data.size() > 0) { //중복인 경우
-        		throw new GeneralException(ExceptionConstant.ALREADY_EXIST_EMAIL.getCode(), ExceptionConstant.ALREADY_EXIST_EMAIL.getMessage());
-        	}
+    @Transactional
+    public void createUser(UserDTO user) throws Exception{
+        //id 중복 체크
+        boolean isDuplicated = userRepository.existsByUserId(user.getId());
+        if(isDuplicated) {
+        	throw new GeneralException(ExceptionConstant.ALREADY_EXIST_ID.getCode(), ExceptionConstant.ALREADY_EXIST_ID.getMessage());
+        }
         	
-        	return Boarddao.createUser(user);
-        }else { //수정인 경우 
-        	return Boarddao.updateUser(user);
+        //email 중복 체크
+        isDuplicated = userRepository.existsByEmail(user.getEmail());
+        if(isDuplicated) { //중복인 경우
+        	throw new GeneralException(ExceptionConstant.ALREADY_EXIST_EMAIL.getCode(), ExceptionConstant.ALREADY_EXIST_EMAIL.getMessage());
         }
         
+        //회원 생성
+        user.setSysNo(UUID.randomUUID().toString().replace("-", "")); //회원 system_no 생성
+        userRepository.save(user.toEntity());
     }
     
     /* 로그인 */ 
-    public Map<String, String> login(String id, String password, HttpServletResponse response) throws Exception{
-    	Map<String, String> requestData = new HashMap<String, String>();
-    	requestData.put("key", "id");
-    	requestData.put("value", id);
-    	Map<String, String> responseData = new HashMap<>();
+    @Transactional
+    public Map<String, String> login(Map<String, String> request) throws Exception{
+    	String id = request.get("id");
+    	String password = request.get("password");
     	
-    	//id 기반 존재 여부 확인
-    	List<UserDTO> user = Boarddao.checkUser(requestData);
-    	if(user.size() <= 0) {//존재하지 않으면 
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), "Non-existent member.");
-    	}
-    	else{
-    		//password 확인
-    		if(!user.get(0).getPassword().equals(password)) {
-    			throw new GeneralException(ExceptionConstant.OPERATION.getCode(), "Password mismatch.");
-    		}
-    		
-    		//AccessToken jwt 생성
-    		String accessToken = JwtUtil.generateAccessToken(id, user.get(0).getSysNo());
-    		responseData.put("accessToken", accessToken);
-    		//RefreshToken jwt 생성
-    		String refreshToken = JwtUtil.generateRefreshToken(id, user.get(0).getSysNo());
-//    		responseData.put("refreshToken", refreshToken);
-    		
-    		//RefreshToken을 Redis에 저장 
-    		redisTemplate.opsForValue().set(
-    	            "refresh:" + user.get(0).getSysNo(),
-    	            refreshToken,
-    	            86400000, TimeUnit.MILLISECONDS // 만료 시간 설정
-    	    );
-    		
-    		// Refresh Token을 HttpOnlye 쿠키에 담기
-    		Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            refreshTokenCookie.setHttpOnly(true); // JavaScript에서 접근 불가
-//            refreshTokenCookie.setSecure(true); // HTTPS에서만 전송
-            refreshTokenCookie.setPath("/"); // 모든 경로에서 접근 가능
-            refreshTokenCookie.setMaxAge(24 * 60 * 60); // 24시간 유효
-//            refreshTokenCookie.setSameSite("Strict"); // CSRF 방지
-            response.addCookie(refreshTokenCookie); // 응답에 쿠키 추가
+    	//회원 정보 조회
+    	User user = userRepository.findByUserId(id)
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
 
+    	//비밀번호 체크
+    	if(!user.getPassword().equals(password)) {
+    		throw new GeneralException(ExceptionConstant.PASSWORD_NOT_MATCH.getCode(), ExceptionConstant.PASSWORD_NOT_MATCH.getMessage());
+    	}
     		
-            response.addCookie(refreshTokenCookie);
-        			
-    	}
-        return responseData;
+    	//AccessToken JWT 생성
+    	String accessToken = JwtUtil.generateAccessToken(id, user.getSysNo());
+    	Map<String, String> response = Map.of("accessToken", accessToken);
+
+        return response;
     }
     
-    /* 아이디 찾기/비밀번호 찾기 */ 
-    public String findIdPw(Map<String, String> requestData) throws Exception{
-    	String find = "";
-    	
-    	//회원 정보 존재 여부 확인
-    	List<UserDTO> user = Boarddao.checkUser(requestData);
-    	if(user.size() <= 0) { //존재하지 않으면 
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), "Non-existent member.");
-    	}
-    	else{ //존재하면
-    		if(requestData.get("key") == "id") {
-    			find = user.get(0).getId();
-    		}else {
-    			find = user.get(0).getPassword();
-    		}
-    	}
-        return find;
-    }
-    
-    /* 사용자 상세 조회 */ 
-    public UserDTO getUserDetail(Map<String, String> requestData) throws Exception{
-    	List<UserDTO> user = Boarddao.checkUser(requestData);
-    	if(user.size() <= 0) { //존재하지 않으면 
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), "Non-existent member.");
-    	}
-        return user.get(0);
-    }
-    
-    /* 사용자 상세 수정 */ 
-    public int updateUserDetail(UserDTO user) throws Exception{
-    	//email 중복 확인
-    	Map<String, String> requestData = new HashMap<String, String>();
-    	
-    	requestData.put("key", "email");
-    	requestData.put("value", user.getEmail());
-    	List<UserDTO> data = Boarddao.checkUser(requestData);
-    	if(data.size() > 1) { //중복인 경우
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), "Email already exists.");
+    /* 아이디, 비밀번호 찾기 */ 
+    @Transactional
+    public String findIdPw(Map<String, String> request) throws Exception{
+    	User user;
+    	String result;
+    	if(request.get("type").equals("findId")) { //아이디 찾기인 경우 
+    		user = userRepository.findByEmail(request.get("email"))
+        			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+    		result = user.getUserId();
+    	} else { //비밀번호 찾기인 경우 
+    		user = userRepository.findByUserId(request.get("id"))
+        			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+    		result = user.getPassword();
     	}
     	
-    	int result = Boarddao.updateUserDetail(user);
         return result;
     }
     
-    /* 비밀번호 수정 */ 
-    public int updateUserPw(Map<String, String> requestData) throws Exception{
-    	int result = Boarddao.updateUserPw(requestData);
-        return result;
+    /* 회원 상세 정보 조회 */
+    public UserDTO getUserDetail(String userSysNo) throws Exception{
+    	User user = userRepository.findById(userSysNo)
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+
+    	UserDTO userDto = UserDTO.fromEntity(user);
+
+        return userDto;
+    }
+    
+    /* 회원 정보 수정 */ 
+    @Transactional
+    public void updateUserDetail(UserDTO userDto) throws Exception{
+    	//email 중복 체크
+        boolean isDuplicated = userRepository.existsByEmail(userDto.getEmail());
+        if(isDuplicated) { //중복인 경우
+        	throw new GeneralException(ExceptionConstant.ALREADY_EXIST_EMAIL.getCode(), ExceptionConstant.ALREADY_EXIST_EMAIL.getMessage());
+        }
+    	
+        //회원 정보 조회
+        User user = userRepository.findById(userDto.getSysNo())
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+
+        //회원 정보 수정
+        user.updateUser(userDto.getName(), userDto.getEmail(), userDto.getPhone());
+    }
+    
+    /* 회원 정보 수정(비밀번호) */ 
+    @Transactional
+    public void updateUserPw(Map<String, String> request) throws Exception{
+    	//회원 정보 조회
+        User user = userRepository.findById(request.get("sysNo"))
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+
+        //회원 정보 수정
+        user.updateUser(request.get("newPassword"));
     }
 }
 
