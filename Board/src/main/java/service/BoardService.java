@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import aws.S3Service;
 import constant.ExceptionConstant;
@@ -23,12 +23,20 @@ import dto.CommentDTO;
 import dto.NotificationDTO;
 import dto.ResponseDTO;
 import dto.SearchDTO;
+import dto.UserDTO;
+import entity.Board;
+import entity.Comment;
+import entity.User;
 import exceptionHandle.GeneralException;
+import lombok.RequiredArgsConstructor;
+import repository.BoardRepository;
+import repository.CommentRepository;
+import repository.UserRepository;
 import webSocketHandle.NotificationWebSocketHandler;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+@RequiredArgsConstructor
 @Service
 public class BoardService {
 	@Autowired                     
@@ -44,22 +52,17 @@ public class BoardService {
 	@Autowired
     private SqlSession sqlSession;
 	
-
-    public BoardService(BoardDAO Boarddao, S3Service S3service,@Lazy NotificationWebSocketHandler notificationWebSocketHandler, NotificationService NotificationService) { 
-        this.Boarddao = Boarddao;
-        this.S3service = S3service;
-        this.notificationWebSocketHandler = notificationWebSocketHandler;
-        this.NotificationService = NotificationService;
-    }
+	private final BoardRepository boardRepository;
+	private final CommentRepository commentRepository;
 
     /* 게시판 목록 조회 */ 
     public List<Object> getAllBoardList(SearchDTO search) throws Exception{
     	//Count 조회
+    	search.count
     	search.setCountFlag(1);
     	int BoardListCount = Boarddao.getAllCountBoardList(search);
     	
     	//10개씩 조회
-    	search.setCountFlag(0);
     	List<BoardDTO> BoardList = Boarddao.getAllBoardList(search);
     	
     	
@@ -119,54 +122,66 @@ public class BoardService {
     }
     
     /* 게시물 생성 & 수정 */ 
-    public int postBoard(BoardDTO requestParam) throws Exception{
-    	//strImgPath 넣기
-    	requestParam.setStrImgPath(String.join(",", requestParam.getImgPath()));
+    @Transactional
+    public void postBoard(BoardDTO boardDto) throws Exception{
+    	//이미지 경로 String으로 바꾸기 
+    	boardDto.setStrImgPath(String.join(",", boardDto.getImgPath()));
     	
-        if(requestParam.getSysNo() == "") { //신규 생성인 경우 
-        	return Boarddao.createBoard(requestParam);
+        if(boardDto.getSysNo().equals("")) { //신규 생성인 경우 
+        	boardDto.setSysNo(UUID.randomUUID().toString().replace("-", "")); //게시물 system_no 생성
+            boardRepository.save(boardDto.toEntity());
         }else { //수정인 경우 
-        	System.out.println(requestParam.toString());
-        	return Boarddao.updateBoard(requestParam);
+        	//게시물 조회
+        	Board board = boardRepository.findById(boardDto.getSysNo())
+        			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_BOARD.getCode(), ExceptionConstant.NOT_FOUND_BOARD.getMessage()));
+
+        	//게시물 수정
+        	board.updateBoard(boardDto.getTitle(), boardDto.getContent(), boardDto.getStrImgPath());
         }
-        
     }
     
     /* 게시물 상세 조회 */ 
+    @Transactional
     public List<Object> getBoardDetail(SearchDTO search) throws Exception{  
-    	BoardDTO boardDto = Boarddao.getBoardDetail(search);
-    	List<CommentDTO> commentDto = Boarddao.getComment(search);
-    	System.out.println(commentDto.toString());
+    	String boardSysNo = search.getSearchList().get("sysNo");
+    	String userSysNo = search.getUserSysNo();
     	
-        Map<String, CommentDTO> rootMap = new HashMap<>();
-        List<CommentDTO> rootComments = new ArrayList<>();
+    	//게시물 조회 -> 수정 필요
+    	Board board = boardRepository.findByBoardSysNoAndUserId(boardSysNo, userSysNo)
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_BOARD.getCode(), ExceptionConstant.NOT_FOUND_BOARD.getMessage()));
+    	
+    	//댓글 조회
+    	List<Comment> comments = commentRepository.findByBoardSysNo(boardSysNo);
+    	
+        List<CommentDTO> commentList = new ArrayList<>();
+        Map<String, CommentDTO> parentComments = new HashMap<>();
         List<CommentDTO> childComments = new ArrayList<>();
 
-        for (CommentDTO comment : commentDto) {
-
-            if (comment.getParSysNo().equals("")) { //루트 댓글인 경우(부모) 
-                rootComments.add(comment);
-                rootMap.put(comment.getSysNo(), comment); 
+        //댓글 순회하면서 부모(루트), 자식 나누기 
+        for (Comment comment : comments) {
+        	CommentDTO commentdto = CommentDTO.fromEntity(comment);
+        	
+            if (comment.getParSysNo().equals("")) { //루트 댓글인 경우(부모)
+            	commentList.add(commentdto);
+                parentComments.put(comment.getSysNo(), commentdto); 
             } else { //루트 댓글이 아닌 경우(자식)
-                childComments.add(comment);
+                childComments.add(commentdto);
             }
         }
 
-        // 자식을 돌면서 부모의 Replies에 자식 세팅
+        //자식 댓글 순회하면서 부모의 대댓글에 자식 세팅
         for (CommentDTO comment : childComments) {
-            CommentDTO parent = rootMap.get(comment.getParSysNo()); // Map에서 부모 찾기
+            CommentDTO parent = parentComments.get(comment.getParSysNo()); //부모 찾기
             if (parent != null) {
                 parent.getReplies().add(comment);
             }
         }
     	
-    	System.out.printf("getStrImgPath: %s", boardDto.getStrImgPath());
-    	List<String> imgPath = new ArrayList<>(Arrays.asList(boardDto.getStrImgPath().split(",")));
-    	boardDto.setImgPath(imgPath);
+    	List<String> imgPath = new ArrayList<>(Arrays.asList(board.getImgPath().split(",")));
+    	BoardDTO boardDto = BoardDTO.fromEntity(board, imgPath); //여기 세팅 조회 수정 후 넘어가서 수정해야 함!!
     	
-    	List<Object> data = new ArrayList<>();
-        data.add(boardDto);
-        data.add(rootComments);
+    	//응답 세팅
+    	List<Object> data = new ArrayList<>(Arrays.asList(boardDto, commentList));
     	
         return data;
     }
@@ -288,19 +303,5 @@ public class BoardService {
     public int updateNotiReadFlag(NotificationDTO requestParam) throws Exception{
     	return Boarddao.updateNotiReadFlag(requestParam); 
     }
-    
-//    public String testRedisConnection() {
-//        // Redis에 간단한 키-값 쌍을 설정하고 확인하는 예제
-//        String key = "testKey";
-//        String value = "testValue";
-//
-//        // Redis에 값을 설정
-//        redisTemplate.opsForValue().set(key, value);
-//
-//        // Redis에서 값을 가져와서 확인
-//        String retrievedValue = redisTemplate.opsForValue().get(key);
-//
-//        return "Stored value: " + retrievedValue;
-//    }
 }
 

@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,14 +18,17 @@ import dto.CommentDTO;
 import dto.NotificationDTO;
 import dto.ResponseDTO;
 import dto.SearchDTO;
+import entity.Board;
 import exceptionHandle.GeneralException;
+import repository.BoardRepository;
+import repository.UserRepository;
 import service.BoardService;
 
 @RestController
 @RequestMapping("/api/board") 
 public class BoardController {
 	@Autowired
-    private final BoardService boardService; //필드 선언, private: 해당 클래스에서만 접근 가능, final: 초기화 후 변경 불가능
+    private final BoardService boardService; 
 	
     public BoardController(BoardService boardService) {
         this.boardService = boardService;
@@ -31,12 +36,12 @@ public class BoardController {
 
     /* 게시판 목록 조회 */
     @PostMapping("/list")
-    public ResponseDTO<Object> getBoardList(@RequestBody SearchDTO search) throws Exception {
+    public ResponseEntity<ResponseDTO<Object>> getBoardList(@RequestBody SearchDTO search) throws Exception {
     	List<Object> data = boardService.getAllBoardList(search);
     	if(data.size() <= 0) {
-    		return new ResponseDTO<>();
+    		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     	} else {
-    		return new ResponseDTO<>(data);
+    		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     	}
     }
     
@@ -59,36 +64,25 @@ public class BoardController {
     	return boardService.deleteFiles(keys); //성공:1, 실패:0
     }
     
-    /* 게시물 생성 & 수정 
-     * sysNo 없을 경우 신규 생성,
-     * sysNo 있을 경우 수정*/
+    /* 게시물 생성, 수정 */ 
+    /* sysNo 없을 경우 신규 생성, sysNo 있을 경우 수정 */
     @PostMapping ("/post") 
-    public ResponseDTO<Object> postBoard(@RequestBody BoardDTO board) throws Exception {
-    	System.out.printf("sysNo: %s\n", board.getSysNo());
-    	
-    	//게시물 생성 / 수정
-    	int data = boardService.postBoard(board); //성공:1, 실패:0
+    public ResponseEntity<ResponseDTO<Object>> postBoard(@RequestBody BoardDTO board) throws Exception {
+    	boardService.postBoard(board); 
 
-    	if(data == 0) { //게시물 생성 & 수정 실패했을 경우
-    		System.out.println("Operation Error");
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-    	}
-    	return new ResponseDTO<>();
+    	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     }
     
     /* 게시물 상세 조회 */
     @PostMapping("/detail") 
-    public ResponseDTO<Object> getBoardDetail(@RequestBody SearchDTO search) throws Exception {
+    public ResponseEntity<ResponseDTO<Object>> getBoardDetail(@RequestBody SearchDTO search) throws Exception {
     	List<Object> data = boardService.getBoardDetail(search);
-    	System.out.println("board");
-    	System.out.println(data.toString());
-    	
-    	//데이터 없을 때 에러 표시 해야 함
-    	if(data.size() <= 0) {
-    		System.out.println("Data Not Exist");
-    		throw new GeneralException(ExceptionConstant.OPERATION.getCode(), ExceptionConstant.OPERATION.getMessage());
-    	}
-    	return new ResponseDTO<>(data);
+    	Board board = boardRepository.findByUserId(request.get("id"))
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUNT_BOARD.getCode(), ExceptionConstant.NOT_FOUNT_BOARD.getMessage()));
+		result = user.getPassword();
+		
+		
+    	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>(data));
     }
     
     /* 게시물 조회수, 좋아요 증가 */

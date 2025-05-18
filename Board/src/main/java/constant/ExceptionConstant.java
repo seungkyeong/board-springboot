@@ -4,11 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum ExceptionConstant { 
+	INTERNAL_ERROR(20000, "Internal server error."),
 	ALREADY_EXIST_ID(20001, "ID is already exists."),
 	ALREADY_EXIST_EMAIL(20002, "Email is already exists."),
 	NOT_FOUND_USER(20003, "User not found."),
 	PASSWORD_NOT_MATCH(20004, "Password does not match."),
-	INTERNAL_ERROR(20000, "Internal server error."),
+	NOT_FOUND_BOARD(20005, "Board not found."),
 	
 	
 	//얘네 한번 확인
