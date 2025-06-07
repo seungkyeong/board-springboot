@@ -17,8 +17,6 @@ public class UserDTO extends RequestDTO{
     /* User를 UserDTO로 세팅 */
     public UserDTO(User user) {
     	super.setSysNo(user.getSysNo());
-    	super.setModifyDate(user.getModifyDate());
-    	super.setCreateDate(user.getCreateDate());
     	this.id = user.getUserId();
     	this.password = user.getPassword();
     	this.name = user.getName();
@@ -35,8 +33,6 @@ public class UserDTO extends RequestDTO{
                 .password(password)
                 .email(email)
                 .phone(phone)
-                .modifyDate(this.getModifyDate())
-                .createDate(this.getCreateDate())
                 .build();
         return user;
     }

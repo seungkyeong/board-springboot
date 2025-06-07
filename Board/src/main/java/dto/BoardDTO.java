@@ -2,13 +2,13 @@ package dto;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import entity.Board;
-import entity.User;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
+@NoArgsConstructor
 public class BoardDTO extends RequestDTO{
     private String title;				//제목
     private String content;				//내용
@@ -21,13 +21,26 @@ public class BoardDTO extends RequestDTO{
     /* Board를 BoardDTO로 세팅 */
     public BoardDTO(Board board, List<String> imgPath) {
     	super.setSysNo(board.getSysNo());
-    	super.setModifyDate(board.getModifyDate());
-    	super.setCreateDate(board.getCreateDate());
+//    	super.setModifyDate(board.getModifyDate());
+//    	super.setCreateDate(board.getCreateDate());
+    	this.title = board.getTitle();
+    	this.content = board.getContent();
+//    	this.view = board.getView();
+//    	this.likeCount = board.getLike();
+//    	this.likeFlag = board.();
+    }
+    
+    /* Board를 BoardDTO로 세팅 */
+    public BoardDTO(Board board) {
+    	super.setSysNo(board.getSysNo());
+//    	super.setModifyDate(board.getModifyDate());
+//    	super.setCreateDate(board.getCreateDate());
+    	super.setUserId(board.getUserId());
+    	super.setUserSysNo(board.getUserSysNo());
     	this.title = board.getTitle();
     	this.content = board.getContent();
     	this.view = board.getView();
     	this.likeCount = board.getLike();
-    	this.likeFlag = board.();
     }
     
     /* BoardDTO -> Board Entity 변환 */
@@ -39,8 +52,8 @@ public class BoardDTO extends RequestDTO{
                 .imgPath(strImgPath)
                 .userId(this.getUserId())
                 .userSysNo(this.getUserSysNo())
-                .modifyDate(this.getModifyDate())
-                .createDate(this.getCreateDate())
+//                .modifyDate(this.getModifyDate())
+//                .createDate(this.getCreateDate())
                 .build();
         return board;
     }
@@ -48,6 +61,11 @@ public class BoardDTO extends RequestDTO{
     /* Board Entity -> BoardDTO 변환 */
     public static BoardDTO fromEntity(Board board, List<String> imgPath) {
         return new BoardDTO(board, imgPath);
+    }
+    
+    /* Board Entity -> BoardDTO 변환 */
+    public static BoardDTO fromEntity(Board board) {
+        return new BoardDTO(board);
     }
 }
 

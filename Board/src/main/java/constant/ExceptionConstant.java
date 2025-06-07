@@ -10,6 +10,7 @@ public enum ExceptionConstant {
 	NOT_FOUND_USER(20003, "User not found."),
 	PASSWORD_NOT_MATCH(20004, "Password does not match."),
 	NOT_FOUND_BOARD(20005, "Board not found."),
+	NOT_FOUNT_NOTI(20006, "Notification not found."),
 	
 	
 	//얘네 한번 확인
