@@ -11,7 +11,7 @@ import entity.Likelog;
 
 public interface LikeRepository extends JpaRepository<Likelog, String> {
     /* 좋아요 로그 삭제 */
-	void deleteByBoardSysNoAndUserId(String boardSysNo, String UserSysNo);
+	void deleteByBoardSysNoAndUserSysNo(String boardSysNo, String UserSysNo);
 	
 	/* 좋아요 삭제(다중) */
 	@Modifying

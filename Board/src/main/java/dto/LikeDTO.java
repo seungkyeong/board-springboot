@@ -16,8 +16,6 @@ public class LikeDTO extends RequestDTO{
         		.userId(this.getUserId())
         		.userSysNo(this.getUserSysNo())
         		.boardSysNo(boardSysNo)
-//                .modifyDate(this.getModifyDate())
-//                .createDate(this.getCreateDate())
                 .build();
         return like;
     }

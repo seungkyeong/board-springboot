@@ -20,8 +20,6 @@ public class CommentDTO extends RequestDTO {
     
     public CommentDTO(Comment comment) {
     	super.setSysNo(comment.getSysNo());
-//    	super.setModifyDate(comment.getModifyDate());
-//    	super.setCreateDate(comment.getCreateDate());
     	this.comment = comment.getComment();
     	super.setUserId(comment.getUserId());
     	super.setUserSysNo(comment.getUserSysNo());
@@ -38,8 +36,6 @@ public class CommentDTO extends RequestDTO {
         		.comment(this.comment)
         		.userId(boardCreater)
         		.userSysNo(boardCreaterSysNo)
-//                .modifyDate(this.getModifyDate())
-//                .createDate(this.getCreateDate())
                 .build();
         return comment;
     }

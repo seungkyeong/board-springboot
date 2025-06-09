@@ -76,21 +76,6 @@ public class BoardService {
         	BoardList.add(boardDto);
         });
         
-    	//좋아요 리스트 있을 때 인듯.
-//        if(search.getType().equals("likeList")) {
-//        	boards.forEach(board -> {
-//           	 String redisKey = "count:like:" + board.getSysNo();
-//           	 ValueOperations<String, Long> ops = redisTemplate.opsForValue();
-//
-//           	 // Redis에 해당 키가 없는 경우만 설정 
-//           	 ops.setIfAbsent(redisKey, board.getLikeCount());
-//           	 
-//           	//Redis에서 조회해서 view만 세팅
-//           	 Long likeCount = ops.get(redisKey);
-//           	 board.setLikeCount(likeCount);
-//           });
-//        }
-        
         List<Object> data = new ArrayList<>();
         data.add(BoardListCount);
         data.add(BoardList);
@@ -208,7 +193,7 @@ public class BoardService {
     		like.setSysNo(UUID.randomUUID().toString().replace("-", "")); //회원 system_no 생성
     		likeRepository.save(like.toEntity());
     	} else { //좋아요 취소한 경우 
-    		likeRepository.deleteByBoardSysNoAndUserId(like.getBoardSysNo(), like.getUserSysNo());
+    		likeRepository.deleteByBoardSysNoAndUserSysNo(like.getBoardSysNo(), like.getUserSysNo());
     	}
     }
     

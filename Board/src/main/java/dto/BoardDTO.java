@@ -21,20 +21,13 @@ public class BoardDTO extends RequestDTO{
     /* Board를 BoardDTO로 세팅 */
     public BoardDTO(Board board, List<String> imgPath) {
     	super.setSysNo(board.getSysNo());
-//    	super.setModifyDate(board.getModifyDate());
-//    	super.setCreateDate(board.getCreateDate());
     	this.title = board.getTitle();
     	this.content = board.getContent();
-//    	this.view = board.getView();
-//    	this.likeCount = board.getLike();
-//    	this.likeFlag = board.();
     }
     
     /* Board를 BoardDTO로 세팅 */
     public BoardDTO(Board board) {
     	super.setSysNo(board.getSysNo());
-//    	super.setModifyDate(board.getModifyDate());
-//    	super.setCreateDate(board.getCreateDate());
     	super.setUserId(board.getUserId());
     	super.setUserSysNo(board.getUserSysNo());
     	this.title = board.getTitle();
@@ -52,8 +45,6 @@ public class BoardDTO extends RequestDTO{
                 .imgPath(strImgPath)
                 .userId(this.getUserId())
                 .userSysNo(this.getUserSysNo())
-//                .modifyDate(this.getModifyDate())
-//                .createDate(this.getCreateDate())
                 .build();
         return board;
     }

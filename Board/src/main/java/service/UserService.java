@@ -91,7 +91,7 @@ public class UserService {
     @Transactional
     public void updateUserDetail(UserDTO userDto) throws Exception{
     	//email 중복 체크
-        boolean isDuplicated = userRepository.existsByEmail(userDto.getEmail());
+        boolean isDuplicated = userRepository.existsByEmailAndSysNoNot(userDto.getEmail(), userDto.getSysNo());
         if(isDuplicated) { //중복인 경우
         	throw new GeneralException(ExceptionConstant.ALREADY_EXIST_EMAIL.getCode(), ExceptionConstant.ALREADY_EXIST_EMAIL.getMessage());
         }

@@ -10,9 +10,6 @@ public class RequestDTO {
     private String sysNo;
     private String userId;
     private String userSysNo; 
-    
     private LocalDateTime createDate;
-    
-    
     private LocalDateTime modifyDate;
 }
