@@ -2,13 +2,22 @@ package service;
 
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import auth.CustomUserDetails;
 import constant.ExceptionConstant;
+import dto.LoginDTO;
 import dto.UserDTO;
+import entity.Role;
 import entity.User;
 import exceptionHandle.GeneralException;
 import lombok.RequiredArgsConstructor;
+import repository.RoleRepository;
 import repository.UserRepository;
 import util.JwtUtil;
 
@@ -16,6 +25,9 @@ import util.JwtUtil;
 @Service
 public class UserService {
 	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final AuthenticationManager authenticationManager;
 	
     /* 회원가입 */ 
     @Transactional
@@ -32,28 +44,47 @@ public class UserService {
         	throw new GeneralException(ExceptionConstant.ALREADY_EXIST_EMAIL.getCode(), ExceptionConstant.ALREADY_EXIST_EMAIL.getMessage());
         }
         
+        //Role 조회
+        Role role = roleRepository.findByRole("USER")
+        	    .orElseThrow(() -> new IllegalArgumentException("Invalid role ID"));
+        
+        //password 암호화
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
+        
+        //회원 system_no 생성
+        user.setSysNo(UUID.randomUUID().toString().replace("-", "")); 
+        
         //회원 생성
-        user.setSysNo(UUID.randomUUID().toString().replace("-", "")); //회원 system_no 생성
-        userRepository.save(user.toEntity());
+        User userEntity = user.toEntity(role);
+        userRepository.save(userEntity);
     }
     
     /* 로그인 */ 
     @Transactional
-    public Map<String, String> login(Map<String, String> request) throws Exception{
-    	String id = request.get("id");
-    	String password = request.get("password");
-    	
-    	//회원 정보 조회
-    	User user = userRepository.findByUserId(id)
-    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
+    public Map<String, String> login(LoginDTO loginDto) throws Exception{
+        //Authentication 객체 생성(사용자 로그인 정보)
+        Authentication authentication = authenticationManager.authenticate(
+        		new UsernamePasswordAuthenticationToken(
+        				loginDto.getId(), loginDto.getPassword()
+        		)
+        );
+        
+        //사용자 정보 저장
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        //사용자 정보 가져오기
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser(); 
 
+    	
     	//비밀번호 체크
-    	if(!user.getPassword().equals(password)) {
+    	if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
     		throw new GeneralException(ExceptionConstant.PASSWORD_NOT_MATCH.getCode(), ExceptionConstant.PASSWORD_NOT_MATCH.getMessage());
     	}
-    		
+
     	//AccessToken JWT 생성
-    	String accessToken = JwtUtil.generateAccessToken(id, user.getSysNo());
+    	String accessToken = JwtUtil.generateAccessToken(user.getUserId(), user.getSysNo(), user.getRole().getRole());
     	Map<String, String> response = Map.of("accessToken", accessToken);
 
         return response;

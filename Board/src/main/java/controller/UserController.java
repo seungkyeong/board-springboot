@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import dto.LoginDTO;
 import dto.ResponseDTO;
 import dto.UserDTO;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,8 @@ public class UserController {
     
     /* 로그인 */
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO<Object>> login(@RequestBody Map<String, String> request) throws Exception {	 
-    	Map<String, String> data = userService.login(request); 
+    public ResponseEntity<ResponseDTO<Object>> login(@RequestBody LoginDTO login) throws Exception {	 
+    	Map<String, String> data = userService.login(login); 
     	
     	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>(data));
     }

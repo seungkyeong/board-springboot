@@ -3,13 +3,17 @@ package util;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.List;
 
-@WebFilter("/*") // 모든 요청에 대해 필터 적용
+@Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 	
     private static final String HEADER = "Authorization"; // Authorization 헤더에 JWT 토큰이 포함됨
@@ -55,10 +59,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             	System.out.println("userIdFromToken");
                 System.out.println(userIdFromToken);
             	
-                // JWT 검증
-                if (JwtUtil.validateToken(token, userIdFromToken)) { // 유효성 검사
-                    // JWT가 유효한 경우, 요청을 처리
-                    filterChain.doFilter(request, response);
+                //JWT 검증
+                if (JwtUtil.validateToken(token, userIdFromToken)) { //JWR가 유효한 경우 
+                	//인증 객체 생성
+                    String role = JwtUtil.extractUserRole(token); 
+                    UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                            userIdFromToken,
+                            null,
+                            List.of(new SimpleGrantedAuthority(role))
+                        );
+
+                    //Security에 인증 등록
+                    SecurityContextHolder.getContext().setAuthentication(authentication); 
+
+                    filterChain.doFilter(request, response); // 다음 필터로 이동
                 } else { // JWT가 유효하지 않은 경우, 인증 오류 응답
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                 }

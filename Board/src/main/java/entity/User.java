@@ -3,7 +3,10 @@ package entity;
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
@@ -42,6 +45,10 @@ public class User {
     @Column(name = "create_date")
     private LocalDateTime createDate; //생성일
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_system_no")
+    private Role role;
+
     /* 회원 정보 수정 */
     public void updateUser(String name, String email, String phone) {
         this.name = name;

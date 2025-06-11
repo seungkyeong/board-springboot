@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import aws.S3Service;
 import constant.ExceptionConstant;
-import dao.BoardDAO;
 import dto.BoardDTO;
 import dto.CommentDTO;
 import dto.LikeDTO;
@@ -37,8 +36,6 @@ import org.springframework.data.redis.core.ValueOperations;
 @RequiredArgsConstructor
 @Service
 public class BoardService {
-	@Autowired                     
-	private final BoardDAO Boarddao;
 	@Autowired                     
 	private final S3Service S3service;
 	@Autowired
@@ -205,7 +202,7 @@ public class BoardService {
     	}
     	
     	// DB에 조회수 반영
-        int data = Boarddao.syncCount(requestData);
+//        int data = Boarddao.syncCount(requestData);
     }
     
     /* 댓글 생성, 수정 */ 

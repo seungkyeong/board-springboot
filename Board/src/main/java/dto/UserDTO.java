@@ -1,5 +1,6 @@
 package dto;
 
+import entity.Role;
 import entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class UserDTO extends RequestDTO{
     }
     
     /* UserDTO -> User Entity 변환 */
-    public User toEntity() {
+    public User toEntity(Role role) {
         User user = User.builder()
         		.sysNo(this.getSysNo())
                 .userId(id)
@@ -33,6 +34,7 @@ public class UserDTO extends RequestDTO{
                 .password(password)
                 .email(email)
                 .phone(phone)
+                .role(role)
                 .build();
         return user;
     }

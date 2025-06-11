@@ -2,7 +2,6 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.0' 
 	id 'io.spring.dependency-management' version '1.1.6'
-	//id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10' // QueryDSL 코드 생성용 플러그인
 }
 
 group = 'com.board'
@@ -30,7 +29,6 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -46,23 +44,27 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	
-	//JPA
+	/* JPA */
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	
-	//mybatis
+	/* mybatis */
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
 	
-	//lombok
+	/* lombok */
 	compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     
-    //QueryDSL
+    /* QueryDSL */
     implementation 'com.querydsl:querydsl-apt:5.0.0'
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     implementation 'com.querydsl:querydsl-core:5.0.0'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api" 
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    
+    /* Security */
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 // Querydsl 빌드 옵션 설정
 def generated = 'src/main/generated'
