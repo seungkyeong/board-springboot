@@ -37,7 +37,7 @@ out/
 .vscode/
 
 ### Sensitive Config ###
-application.properties
+src/main/resources/application.properties
 application.yml
 .env
 src/main/java/constant/AppConstant.java
