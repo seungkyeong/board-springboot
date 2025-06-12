@@ -1,6 +1,10 @@
 package util;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+
+import constant.ApiPathConstant;
+import constant.AppConstant;
+import constant.ExceptionConstant;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,52 +19,45 @@ import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-	
-    private static final String HEADER = "Authorization"; // Authorization 헤더에 JWT 토큰이 포함됨
-    private static final String PREFIX = "Bearer "; // JWT 토큰 앞에 "Bearer "가 붙어 있음
-    private static final String LOGIN_PATH = "/api/board/login"; // 로그인 API 경로
-    private static final String SIGNUP_PATH = "/api/board/signUp";
-    private static final String FINDIDPW_PATH = "/api/board/findIdPw";
+    //API Full Path
+    private static final String LOGIN_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.LOGIN; 
+    private static final String SIGNUP_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.SIGNUP; 
+    private static final String FINDIDPW_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.FIND_ID_PW;
     
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-    	// CORS 헤더 추가 (프리플라이트 요청)
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+    	//CORS 헤더 추가 (프리플라이트 요청)
+        response.setHeader(AppConstant.HttpConfig.HEADER_ALLOW_ORIGIN, AppConstant.HttpConfig.ORIGIN_URL);
+        response.setHeader(AppConstant.HttpConfig.HEADER_ALLOW_METHOD, 
+        		AppConstant.HttpConfig.HTTP_GET + "," + AppConstant.HttpConfig.HTTP_OPTIONS + "," + AppConstant.HttpConfig.HTTP_POST);
+        response.setHeader(AppConstant.HttpConfig.HEADER_ALLOW_HEADER, AppConstant.HttpConfig.HEADER_AUTHORIZATION + "," + AppConstant.HttpConfig.HEADER_CONTENT_TYPE);
+        response.setHeader(AppConstant.HttpConfig.HEADER_ALLOW_CREDENTIALS, "true");
 
         
-    	// OPTIONS 요청은 JWT 검증을 건너뛰기
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+    	// OPTIONS 요청은 JWT 검증 건너뛰기
+        if (AppConstant.HttpConfig.HTTP_OPTIONS.equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
         
-        // 로그인 경로는 JWT 검증을 건너뛰기
+        // 로그인/회원가입/Id,Pw 찾기 경로는 JWT 검증 건너뛰기
         if (request.getRequestURI().equals(LOGIN_PATH) || request.getRequestURI().equals(SIGNUP_PATH) || request.getRequestURI().equals(FINDIDPW_PATH)) {
-            filterChain.doFilter(request, response); // JWT 검사를 건너뛰고 요청을 다음 필터나 서블릿으로 전달
+            filterChain.doFilter(request, response); //JWT 검사를 건너뛰고, 요청을 다음 필터에 전달
             return;
         }
         
-        String authorizationHeader = request.getHeader(HEADER); // 요청 헤더에서 토큰 추출
-        System.out.println("authorizationHeader");
-        System.out.println(authorizationHeader);
+        String authorizationHeader = request.getHeader(AppConstant.HttpConfig.HEADER_AUTHORIZATION); //요청 헤더에서 Authorization 추출
         
-        if (authorizationHeader != null && authorizationHeader.startsWith(PREFIX)) {
-            String token = authorizationHeader.substring(PREFIX.length()); // "Bearer " 이후의 토큰 부분 추출
-            System.out.println("token");
-            System.out.println(token);
+        if (authorizationHeader != null && authorizationHeader.startsWith(AppConstant.HttpConfig.HEADER_AUTH_PREFIX)) {
+            String token = authorizationHeader.substring(AppConstant.HttpConfig.HEADER_AUTH_PREFIX.length()); // JWT 토큰 추출
             try {
             	//userId Token 추출
             	String userIdFromToken = JwtUtil.extractUserId(token);
-            	System.out.println("userIdFromToken");
-                System.out.println(userIdFromToken);
             	
                 //JWT 검증
-                if (JwtUtil.validateToken(token, userIdFromToken)) { //JWR가 유효한 경우 
+                if (JwtUtil.validateToken(token, userIdFromToken)) { //JWT가 유효한 경우 
                 	//인증 객체 생성
                     String role = JwtUtil.extractUserRole(token); 
                     UsernamePasswordAuthenticationToken authentication =
@@ -74,14 +71,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication); 
 
                     filterChain.doFilter(request, response); // 다음 필터로 이동
-                } else { // JWT가 유효하지 않은 경우, 인증 오류 응답
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                } else { //JWT가 유효하지 않은 경우, 오류 응답
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ExceptionConstant.UNAUTHORIZED.getMessage());
                 }
-            } catch (JWTVerificationException e) { // JWT 검증 중 오류 발생 시
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+            } catch (JWTVerificationException e) { //JWT 검증 중 오류 발생한 경우, 오류 응답
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ExceptionConstant.INVALID_EXPIRED_TOKEN.getMessage());
             }
-        } else { // Authorization 헤더가 없거나 잘못된 형식일 경우
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization header is missing or invalid");
+        } else { //Authorization 헤더가 없거나 잘못된 형식일 경우, 오류 응답
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ExceptionConstant.INVALID_AUTH_HEADER.getMessage());
         }
     }
 }

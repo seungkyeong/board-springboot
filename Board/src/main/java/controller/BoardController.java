@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import constant.ApiPathConstant;
 import dto.BoardDTO;
 import dto.CommentDTO;
 import dto.LikeDTO;
@@ -20,13 +21,13 @@ import lombok.RequiredArgsConstructor;
 import service.BoardService;
 
 @RestController
-@RequestMapping("/api/board") 
+@RequestMapping(ApiPathConstant.API_ROOT) 
 @RequiredArgsConstructor
 public class BoardController { 
 	private final BoardService boardService;
 
     /* 게시판 목록 조회 */
-    @PostMapping("/list")
+    @PostMapping(ApiPathConstant.BOARD.GET_LIST)
     public ResponseEntity<ResponseDTO<Object>> getBoardList(@RequestBody SearchDTO search) throws Exception {
     	List<Object> data = boardService.getAllBoardList(search);
     	
@@ -34,26 +35,23 @@ public class BoardController {
     }
     
     /* 파일 업로드 */
-    @PostMapping ("/post/fileUpload") 
+    @PostMapping (ApiPathConstant.BOARD.UPLOAD_FILE) 
     public List<URL> uploadFile(@RequestParam("files") MultipartFile[] files) throws Exception {
-    	//파일 업로드
-    	List<URL> fileUrls = boardService.uploadFile(files); //성공:1, 실패:0
+    	List<URL> fileUrls = boardService.uploadFile(files); 
 
-        // 업로드된 파일들의 URL 반환
-        return fileUrls;
+        return fileUrls; // 업로드된 파일들의 URL 반환
     }
     
     /* 업로드 파일 삭제 */
-    @PostMapping ("/post/fileDelete") 
+    @PostMapping (ApiPathConstant.BOARD.DELETE_FILE) 
     public ResponseDTO<Object> deleteFile(@RequestBody Map<String, List<String>> requestData) throws Exception {
     	List<String> keys = requestData.get("keys");
     	
-    	//파일 업로드
-    	return boardService.deleteFiles(keys); //성공:1, 실패:0
+    	return boardService.deleteFiles(keys); 
     }
     
     /* 게시물 생성, 수정 */ 
-    @PostMapping ("/post") 
+    @PostMapping (ApiPathConstant.BOARD.POST_BOARD) 
     public ResponseEntity<ResponseDTO<Object>> postBoard(@RequestBody BoardDTO board) throws Exception {
     	boardService.postBoard(board); 
 
@@ -61,7 +59,7 @@ public class BoardController {
     }
     
     /* 게시물 상세 조회 */
-    @PostMapping("/detail") 
+    @PostMapping(ApiPathConstant.BOARD.GET_DETAIL) 
     public ResponseEntity<ResponseDTO<Object>> getBoardDetail(@RequestBody SearchDTO search) throws Exception {
     	List<Object> data = boardService.getBoardDetail(search);
 		
@@ -69,16 +67,15 @@ public class BoardController {
     }
     
     /* 게시물 조회수 증가 */
-    @PostMapping("/updateCount") 
+    @PostMapping(ApiPathConstant.BOARD.UPDATE_VIEW) 
     public ResponseEntity<ResponseDTO<Object>> updateCount(@RequestBody Map<String, Object> request) throws Exception {
-    	System.out.printf("sysNo: ", request.get("sysNo"));
     	boardService.updateCount(request);
     	
     	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     }
     
     /* 게시물 좋아요 증가, 감소 */
-    @PostMapping("/updateLike") 
+    @PostMapping(ApiPathConstant.BOARD.UPLOAD_LIKE) 
     public ResponseEntity<ResponseDTO<Object>> updateLike(@RequestBody LikeDTO like) throws Exception {
     	boardService.updateLike(like);
     	
@@ -86,7 +83,7 @@ public class BoardController {
     }
     
     /* 댓글 생성, 수정 */
-    @PostMapping ("/comment") 
+    @PostMapping (ApiPathConstant.BOARD.POST_COMMENT) 
     public ResponseEntity<ResponseDTO<Object>> postComment(@RequestBody CommentDTO comment) throws Exception {
     	boardService.createComment(comment);
     	
@@ -94,7 +91,7 @@ public class BoardController {
     }
      
     /* 게시물 삭제(다중) */
-    @PostMapping("boardDelete")
+    @PostMapping(ApiPathConstant.BOARD.DELETE_BOARD)
     public ResponseEntity<ResponseDTO<Object>> deleteBoardList(@RequestBody Map<String, Object> request) throws Exception {
     	boardService.deleteBoardList(request);
     	
@@ -102,7 +99,7 @@ public class BoardController {
     }
     
     /* 좋아요 삭제(다중) */
-    @PostMapping("likeDelete")
+    @PostMapping(ApiPathConstant.BOARD.DELETE_LIKE)
     public ResponseEntity<ResponseDTO<Object>> deleteLikeList(@RequestBody Map<String, Object> request) throws Exception {
     	boardService.deleteLikeList(request);
     	

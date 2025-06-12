@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+/* QueryDSL 설정 */
 @Configuration
 public class QueryDslConfig {
 

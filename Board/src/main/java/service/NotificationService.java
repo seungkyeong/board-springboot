@@ -50,7 +50,7 @@ public class NotificationService {
     public void updateNotiReadFlag(NotificationDTO notification) throws Exception{
     	//Noti 조회
     	Notification noti = notificationRepository.findById(notification.getSysNo())
-    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUNT_NOTI.getCode(), ExceptionConstant.NOT_FOUNT_NOTI.getMessage()));
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_NOTI.getCode(), ExceptionConstant.NOT_FOUND_NOTI.getMessage()));
 
     	//Noti read 수정
     	noti.updateNotiRead();

@@ -17,30 +17,38 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 public class Notification {
+	/* 알림 System no. */
 	@Id
 	@Column(name = "system_no")
-    private String sysNo; //알림 System no.
+    private String sysNo; 
 
+	/* 알림 대상자 Id */
     @Column(name = "id")
-    private String userId; //알림 대상 회원 id
+    private String userId; 
 
+    /* 알림 대상자 System no. */
     @Column(name = "user_system_no")
-    private String userSysNo; //알림 대상 회원 System no.
+    private String userSysNo; 
     
+    /* 게시물 System no. */
     @Column(name = "board_system_no")
-    private String boardSysNo; //게시물 System no. 
+    private String boardSysNo; 
 
+    /* 게시물 제목 */
     @Column
-    private String title; //게시물 제목
+    private String title; 
     
+    /* 알림 읽음 여부 */
     @Column(name = "read_flag")
-    private Boolean read; //알림 읽음 여부  
+    private Boolean read; 
 
+    /* 수정일 */
     @Column(name = "modify_date")
-    private LocalDateTime modifyDate; //수정일
+    private LocalDateTime modifyDate; 
     
+    /* 생성일 */
     @Column(name = "create_date")
-    private LocalDateTime createDate; //생성일
+    private LocalDateTime createDate; 
     
     /* Noti 수정 */
     public void updateNotiRead() {

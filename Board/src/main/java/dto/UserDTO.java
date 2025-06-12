@@ -15,7 +15,6 @@ public class UserDTO extends RequestDTO{
     private String email;		//이메일
     private String phone;		//핸드폰 번호
     
-    /* User를 UserDTO로 세팅 */
     public UserDTO(User user) {
     	super.setSysNo(user.getSysNo());
     	this.id = user.getUserId();

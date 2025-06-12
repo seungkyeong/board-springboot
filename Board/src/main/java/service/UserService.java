@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import auth.CustomUserDetails;
+import constant.AppConstant;
 import constant.ExceptionConstant;
 import dto.LoginDTO;
 import dto.UserDTO;
@@ -45,8 +46,8 @@ public class UserService {
         }
         
         //Role 조회
-        Role role = roleRepository.findByRole("USER")
-        	    .orElseThrow(() -> new IllegalArgumentException("Invalid role ID"));
+        Role role = roleRepository.findByRole(AppConstant.USER)
+        	    .orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_ROLE.getCode(), ExceptionConstant.NOT_FOUND_ROLE.getMessage()));
         
         //password 암호화
         String hashedPassword = passwordEncoder.encode(user.getPassword());
@@ -85,7 +86,7 @@ public class UserService {
 
     	//AccessToken JWT 생성
     	String accessToken = JwtUtil.generateAccessToken(user.getUserId(), user.getSysNo(), user.getRole().getRole());
-    	Map<String, String> response = Map.of("accessToken", accessToken);
+    	Map<String, String> response = Map.of(AppConstant.ACCESS_TOKEN, accessToken);
 
         return response;
     }
@@ -139,11 +140,11 @@ public class UserService {
     @Transactional
     public void updateUserPw(Map<String, String> request) throws Exception{
     	//회원 정보 조회
-        User user = userRepository.findById(request.get("sysNo"))
+        User user = userRepository.findById(request.get(AppConstant.Property.SYSNO))
     			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
 
         //회원 정보 수정
-        user.updateUser(request.get("newPassword"));
+        user.updateUser(request.get(AppConstant.Property.NEW_PW));
     }
 }
 

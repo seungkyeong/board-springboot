@@ -20,31 +20,40 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 public class User {
+	/* 사용자 System no. */
 	@Id
 	@Column(name = "system_no")
-    private String sysNo; //사용자 System no.
+    private String sysNo; 
 
+	/* Id */
     @Column(name = "id")
-    private String userId; // 아이디
+    private String userId; 
 
+    /* 이름 */
     @Column
-    private String name; //이름
+    private String name; 
     
+    /* 비밀번호 */
     @Column
-    private String password; //비밀번호 
+    private String password;  
 
+    /* 이메일 */
     @Column
-    private String email; //이메일
+    private String email; 
     
+    /* 핸드폰 번호 */
     @Column
-    private String phone; //핸드폰 번호 
+    private String phone;  
 
+    /* 수정일 */
     @Column(name = "modify_date")
-    private LocalDateTime modifyDate; //수정일
+    private LocalDateTime modifyDate; 
     
+    /* 생성일 */
     @Column(name = "create_date")
-    private LocalDateTime createDate; //생성일
+    private LocalDateTime createDate; 
     
+    /* 사용자 Role System no. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_system_no")
     private Role role;

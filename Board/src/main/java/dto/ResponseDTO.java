@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
 
-//공통 Response
+/* 공통 Response */
 @Getter @Setter
 public class ResponseDTO<T> {
     private Boolean success;	//성공 여부

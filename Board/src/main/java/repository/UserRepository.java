@@ -10,10 +10,10 @@ public interface UserRepository extends JpaRepository<User, String> {
     /* 사용자 조회 */
 	Optional<User> findById(String sysNo);
 	Optional<User> findByEmail(String email);
-	Optional<User> findByUserId(String id); //일반적인 사용자 정보 조회
+	Optional<User> findByUserId(String id); //사용자 정보 조회
 
 	@EntityGraph(attributePaths = "role")
-	Optional<User> findWithRoleByUserId(String userId); // Role 정보까지 함께 가져올 때만 사용하는 메서드
+	Optional<User> findWithRoleByUserId(String userId); //사용자 정보 + Role 정보 조회
 
 	
     /* 중복 검사: 중복(true), 중복X(false) */

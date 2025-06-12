@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import aws.S3Service;
+import constant.AppConstant;
 import constant.ExceptionConstant;
 import dto.BoardDTO;
 import dto.CommentDTO;
@@ -35,14 +35,10 @@ import org.springframework.data.redis.core.ValueOperations;
 
 @RequiredArgsConstructor
 @Service
-public class BoardService {
-	@Autowired                     
+public class BoardService {       
 	private final S3Service S3service;
-	@Autowired
     private RedisTemplate<String, Long> redisTemplate;
-	@Autowired
 	private final NotificationWebSocketHandler notificationWebSocketHandler;
-	                     
 	private final NotificationService NotificationService;
 	private final BoardRepository boardRepository;
 	private final LikeRepository likeRepository;
@@ -63,7 +59,7 @@ public class BoardService {
     		BoardDTO boardDto = BoardDTO.fromEntity(board);
         	
         	// 해당 키가 없는 경우만 설정 
-        	String redisKey = "count:view:" + boardDto.getSysNo();
+        	String redisKey = AppConstant.RedisKey.COUNT + ":" + AppConstant.RedisKey.VIEW + boardDto.getSysNo();
         	redisTemplate.opsForValue().setIfAbsent(redisKey, board.getView());
         	 
         	//Redis에서 조회해서 view만 세팅
@@ -86,7 +82,7 @@ public class BoardService {
 
         for (MultipartFile file : files) {
             // 파일 이름 생성(uuid_file)
-        	String decodeFileName = URLDecoder.decode(file.getOriginalFilename(), "UTF-8");
+        	String decodeFileName = URLDecoder.decode(file.getOriginalFilename(), AppConstant.UTF );
             String fileName = UUID.randomUUID().toString().replace("-", "") + decodeFileName;
 
             // S3 임시 업로드 url 발급
@@ -124,7 +120,7 @@ public class BoardService {
     @Transactional
     public List<Object> getBoardDetail(SearchDTO search) throws Exception{  
     	//boardSysNo
-    	String boardSysNo = search.getSearchList().get("sysNo");
+    	String boardSysNo = search.getSearchList().get(AppConstant.Property.SYSNO);
     	//Comment 계층 구조를 위한 변수
     	List<CommentDTO> commentList = new ArrayList<>();
         Map<String, CommentDTO> parentComments = new HashMap<>();
@@ -172,21 +168,21 @@ public class BoardService {
     	ValueOperations<String, Long> ops = redisTemplate.opsForValue();
     	
     	//redis에 조회수 1 증가
-    	String redisKey = "count:" + request.get("type") + ":" + request.get("sysNo");
+    	String redisKey = AppConstant.RedisKey.COUNT + ":" + request.get(AppConstant.Property.TYPE) + ":" + request.get(AppConstant.Property.SYSNO);
     	ops.increment(redisKey, 1);
     	
     	//조회수 값 가져오기
     	Long Count = ops.get(redisKey);
     	
     	//expire redis 세팅 & ttl 세팅
-    	String redisExpiredKey = "expired:" + request.get("type") + ":" + request.get("sysNo");
+    	String redisExpiredKey = AppConstant.RedisKey.EXPIRED + ":" + request.get(AppConstant.Property.TYPE) + ":" + request.get(AppConstant.Property.SYSNO);
     	ops.set(redisExpiredKey, Count, 1, TimeUnit.MINUTES);
     }
     
     /* 게시물 좋아요 증가,감소 */ 
     @Transactional
     public void updateLike(LikeDTO like) throws Exception{  
-    	if(like.getAction().equals("like")) { //좋아요 누른 경우 
+    	if(like.getAction().equals(AppConstant.RedisKey.LIKE)) { //좋아요 누른 경우 
     		like.setSysNo(UUID.randomUUID().toString().replace("-", "")); //회원 system_no 생성
     		likeRepository.save(like.toEntity());
     	} else { //좋아요 취소한 경우 
@@ -194,13 +190,8 @@ public class BoardService {
     	}
     }
     
-    /* ???게시물 조회수 1분마다 DB에 반영 */
+    /* 게시물 조회수 1분마다 DB에 반영 --> 수정 해야 함 */
     public void syncCount(Map<String, Object> requestData) throws Exception{
-    	System.out.printf("requestData.get(\"type\") 결과: %s", requestData.get("type")=="like");
-    	if("like".equals(requestData.get("type"))) {
-    		requestData.put("type", "like_count");
-    	}
-    	
     	// DB에 조회수 반영
 //        int data = Boarddao.syncCount(requestData);
     }
@@ -221,14 +212,14 @@ public class BoardService {
         	NotificationService.saveNotification(comment);
            
         	//Noti 알림 보내기
-        	notificationWebSocketHandler.sendNotification(comment.getBoardCreaterSysNo(), "게시글에 새로운 댓글이 달렸습니다!");
+        	notificationWebSocketHandler.sendNotification(comment.getBoardCreaterSysNo(), AppConstant.SOCKET_MESSAGE);
         }
     }
     
     /* 게시물 삭제(다중) */ 
     @Transactional
     public void deleteBoardList(Map<String, Object> request) throws Exception{
-    	List<String> deleteList = (List<String>) request.get("deleteList");
+    	List<String> deleteList = (List<String>) request.get(AppConstant.Property.DELETE_LIST);
     	
     	//게시물 삭제
     	boardRepository.deleteBoard(deleteList);
@@ -242,7 +233,7 @@ public class BoardService {
         //Redis 삭제
         if (deleteList != null) {
             for (String sysNo : deleteList) {
-                String redisViewKey = "count:view:" + sysNo; 
+                String redisViewKey = AppConstant.RedisKey.COUNT + ":" + AppConstant.RedisKey.VIEW + ":" + sysNo; 
                 redisTemplate.delete(redisViewKey); 
             }
         } 
@@ -251,7 +242,7 @@ public class BoardService {
     /* 좋아요 삭제(다중) */ 
     @Transactional
     public void deleteLikeList(Map<String, Object> request) throws Exception{
-    	List<String> deleteList = (List<String>) request.get("deleteList");
+    	List<String> deleteList = (List<String>) request.get(AppConstant.Property.DELETE_LIST);
         
     	//게시물 좋아요 List 삭제
     	likeRepository.deleteLikelog(deleteList);

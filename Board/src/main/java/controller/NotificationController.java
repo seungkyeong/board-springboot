@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import constant.ApiPathConstant;
 import dto.NotificationDTO;
 import dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,12 @@ import service.NotificationService;
 
 @RequiredArgsConstructor
 @RestController 
-@RequestMapping("/api/board")
+@RequestMapping(ApiPathConstant.API_ROOT)
 public class NotificationController {
     private final NotificationService notificationService; 
     
     /* Noti 알림 조회 */
-    @PostMapping("notiList")
+    @PostMapping(ApiPathConstant.NOTI.GET_LIST)
     public ResponseEntity<ResponseDTO<Object>> getNotiList(@RequestBody NotificationDTO notification) throws Exception {
     	List<NotificationDTO> data = notificationService.getNotiList(notification);
     	
@@ -27,7 +28,7 @@ public class NotificationController {
     }
     
     /* Noti 읽음 Flag 업데이트 */
-    @PostMapping("update/notiList")
+    @PostMapping(ApiPathConstant.NOTI.UPDATE_LIST)
     public ResponseEntity<ResponseDTO<Object>> updateNotiReadFlag(@RequestBody NotificationDTO notification) throws Exception {
     	notificationService.updateNotiReadFlag(notification);
     	
