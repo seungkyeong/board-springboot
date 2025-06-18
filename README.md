@@ -49,7 +49,7 @@
 ### 5. 실행 화면
 <details>
 <summary>게시글 관련 화면</summary>
-![전체게시글목록](https://github.com/user-attachments/assets/ca0ddd94-ec59-4d5d-bfe4-9ea74e18d2cc?raw=true)
+![전체게시글목록](https://github.com/user-attachments/assets/ca0ddd94-ec59-4d5d-bfe4-9ea74e18d2cc.png)
 </details>
 
 <br/>
