@@ -34,6 +34,7 @@
   - QueryDSL 5.0.0
   - Spring Security
   - JWT (java-jwt)
+  - WebSocket
   - Lombok
   - AWS SDK
 - Build Tool
@@ -53,6 +54,77 @@
 ![인프라구조](https://github.com/user-attachments/assets/cf7ed342-2e43-45b8-8143-4c069cc88963)
 
 #### 4-2. DB 설계 
+![erd](https://github.com/user-attachments/assets/633ef676-0046-4201-bc9d-01e4eabba831)
+
+**board(게시글)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 게시글 System No. |
+| title | varchar(100) | Not Null | 제목 |
+| content | text | Not Null | 내용 |
+| view | int unsigned | default 0 | 조회수 |
+| img_path | text |  | 이미지 경로 |
+| id | varchar(100) | Not Null | 작성자 Id |
+| user_system_no | varchar(100) | FK | 작성자 System No. |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+
+**role(역할)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 역할 System No. |
+| role | varchar(100) | Not Null | 역할 |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+
+**user(회원)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 회원 System No. |
+| name | varchar(20) | Not Null | 이름 |
+| email | varchar(200) | Not Null | 이메일 |
+| phone | varchar(100) |  | 전화번호 |
+| id | varchar(100) | Not Null | 회원 Id |
+| password | varchar(100) | Not Null | 비밀번호 |
+| role_sysem_no | varchar(100) | FK | 역할 System No. |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+
+**comment(댓글)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 댓글 System No. |
+| comment | text | Not Null | 댓글 |
+| id | varchar(100) | Not Null | 작성자 Id |
+| user_system_no | varchar(100) | FK | 작성자 System no. |
+| parent_system_no | varchar(100) |  | 상위 댓글 System No. |
+| board_system_no | varchar(100) | FK | 게시글 System No. |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+
+**likelog(좋아요 로그)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 좋아요 System No. |
+| id | varchar(100) | Not Null | 작성자 Id |
+| user_system_no | varchar(100) | FK | 작성자 System no. |
+| board_system_no | varchar(100) | FK | 게시글 System No. |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+
+**notification(알림)**
+| 컬럼명 | 데이터 타입 | 제약 조건 | 설명 |
+| --- | --- | --- | --- |
+| system_no | varchar(100) | PK | 알림 System No. |
+| read_flag | tinyint(1) | default 0 |  |
+| id | varchar(100) | Not Null | 알림 대상자 Id |
+| user_system_no | varchar(100) | FK | 알림 대상자 System no. |
+| board_system_no | varchar(100) | FK | 게시글 System No. |
+| title | varchar(100) | Not Null | 게시글 제목 |
+| create_date | datetime | Not Null | 생성일자 |
+| modify_date | datetime | Not Null | 수정일자 |
+<br/>
+
 #### 4-3. API 명세 
 <br/>
 
