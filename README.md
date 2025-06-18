@@ -12,7 +12,7 @@
 - [API 명세](#api-명세)
 - [실행 화면](#5-실행-화면)
 - [느낀점](#5-느낀점)
-  
+
 ## 📖 들어가며
 ### 1. 프로젝트 소개
 <br/>
@@ -47,6 +47,11 @@
 <br/>
 
 ### 5. 실행 화면
+<details>
+<summary>게시글 관련 화면</summary>
+![전체게시글목록](https://github.com/user-attachments/assets/ca0ddd94-ec59-4d5d-bfe4-9ea74e18d2cc)
+</details>
+
 <br/>
 
 ## 💡 마치며
