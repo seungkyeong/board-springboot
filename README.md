@@ -1,15 +1,17 @@
 # Board Project
 일상생활을 공유하는 자유로운 게시판입니다.
 
-
+![Image](https://github.com/user-attachments/assets/53073f40-7ec9-44a9-ac43-ca7f690ca894)
 ## 📚 목차
 - [프로젝트 소개](#1-프로젝트-소개)
 - [프로젝트 기능](#2-프로젝트-기능)
 - [사용 기술](#3-사용-기술)
   - [백엔드](#3-1-백엔드)
   - [프론트엔드](#3-2-프론트엔드)
-- [ERD](#4-db-설계)
-- [API 명세](#api-명세)
+- [구조 및 설계](#4-구조-및-설계)
+  - [인프라 구조](#4-1-인프라-구조)
+  - [DB 설계](#4-2-DB-설계)
+  - [API 명세](#4-3-API-명세)
 - [실행 화면](#5-실행-화면)
 - [느낀점](#5-느낀점)
 
@@ -43,15 +45,106 @@
 - jsonwebtoken 9.0.2 / jwt-decode 4.0.0  
 <br/>
 
-### 4. DB 설계
+### 4. 구조 및 설계
+#### 4-1. 인프라 구조
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/cf7ed342-2e43-45b8-8143-4c069cc88963" width="600" alt="인프라구조">
+</p>
+
+#### 4-2. DB 설계 
+#### 4-3. API 명세 
 <br/>
 
 ### 5. 실행 화면
+<!-- 게시글 토글 -->
 <details>
 <summary>게시글 관련 화면</summary>
-  ![Image](https://github.com/user-attachments/assets/a05dd33e-3886-4506-bf0e-ba84fe230976)
+  
+**1. 게시글 목록**
+   - 제목, 내용, 작성자는 돋보기🔍 아이콘을 이용하여 검색할 수 있다.
+   - 한 페이지 당 10개씩 조회된다.<br/>
+
+  1-1. 전체 게시글 목록
+  ![전체 게시글 목록](https://github.com/user-attachments/assets/53073f40-7ec9-44a9-ac43-ca7f690ca894)
+  - 최신 생성 순서대로 전체 게시글 목록을 조회한다. <br>
+  
+  1-2. 조회수 Top 게시글 목록
+  ![좋아요Top게시글목록](https://github.com/user-attachments/assets/b4cbb4d4-2ab1-4c34-819d-062849028068)
+  - 상단 [조회수 TOP] 메뉴 클릭
+  - 조회수가 높은 순서대로 게시글 목록을 조회한다.
+
+  1-3. 좋아요 Top 게시글 목록
+  ![조회수Top게시글목록](https://github.com/user-attachments/assets/effba0b1-a093-49be-8a3c-e9d488ea2ad0)
+  - 상단 [좋아요 TOP] 메뉴 클릭
+  - 좋아요 수가 높은 순서대로 게시글 목록을 조회한다.
+
+  1-4. 내 게시글 목록
+  ![profile](https://github.com/user-attachments/assets/c57f9285-ec72-4c8c-a534-9ee4c89aaf67)
+  - 상단 [ID] 메뉴 클릭 → [내 게시글 관리] 클릭
+  ![내게시글목록](https://github.com/user-attachments/assets/89228019-831b-470e-83eb-3f2f9baa0862)
+  - 계정 사용자가 작성한 게시글 목록이 조회된다.
 </details>
 
+<!-- 회원 토글 -->
+<details>
+<summary>회원 관련 화면</summary>
+  
+  **1. 회원가입**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/ccfc9130-7ca0-42ca-bba6-22cdc8ad27c5" width="250" alt="회원가입">
+  </p>
+  
+  - 이메일은 중복될 수 없다.
+  
+  **2. 로그인**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/f1a3a629-0a2a-44f0-b345-5811cdd28a9e" width="250" alt="로그인">
+  </p>
+  
+  - JWT와 Spring Security를 사용하여 로그인을 검증한다.
+
+  **3. 아이디/비밀번호 찾기**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/b1394d26-1144-451f-abe4-5773b95f94f0" width="250" alt="비밀번호찾기"><br/>
+  <img src="https://github.com/user-attachments/assets/79861a59-cac9-4b6d-835e-30ce8a0eb819" width="250" alt="아이디찾기">
+  </p>
+
+   **4. 회원 정보 상세보기/수정**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/bcc7dbd6-3bac-4b9a-9001-ba2c302d7460" width="250" alt="회원정보상세보기">
+  </p>
+
+   **5. 비밀번호 변경**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/1e7d20ea-8b16-42a6-9de6-19ccfec69690" width="250" alt="비밀번호변경">
+  </p>
+</details>
+
+<!-- 댓글 토글 -->
+<details>
+<summary>댓글 관련 화면</summary>
+  
+  **1. 댓글 조회/생성**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/60f237ea-cd55-48e8-a093-5befb0e2179e" width="500" alt="댓글조회및생성">
+  </p>
+
+  - [게시글 상세보기] 하단에서 댓글을 등록할 수 있다.
+  - 댓글에 대한 답글을 등록할 수 있다.이메일은 중복될 수 없다. 
+</details>
+
+<!-- 알림 토글 -->
+<details>
+<summary>알림 관련 화면</summary>
+  
+  **1. 알림 목록**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/8a250a1c-dd98-489a-aaa9-e8c93126e5cf" width="700" alt="알림목록">
+  </p>
+
+  - 다른 사용자가 게시글에 댓글을 남기면, 게시글 작성자에게 알림이 전송된다.
+  - 알림을 클릭하면 해당 [게시글 상세보기]로 이동한다.
+</details>
 <br/>
 
 ## 💡 마치며
