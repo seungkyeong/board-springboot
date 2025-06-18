@@ -39,5 +39,6 @@ out/
 ### Sensitive Config ###
 src/main/resources/application.properties
 application.yml
+application.properties
 .env
 src/main/java/constant/AppConstant.java

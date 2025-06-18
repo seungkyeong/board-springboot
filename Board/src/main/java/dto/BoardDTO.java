@@ -13,7 +13,7 @@ public class BoardDTO extends RequestDTO{
     private String title;								//제목
     private String content;								//내용
     private long view = 0; 								//조회수
-    private long likeCount = 0;         				//좋아요 수 
+    private long like = 0;         				//좋아요 수 
     private String likeFlag;            				//사용자의 좋아요 누른 판별
     private List<String> imgPath = new ArrayList<>(); 	//이미지 경로 List<String>
     private String strImgPath;							//string으로 변환한 imgPath
@@ -28,10 +28,12 @@ public class BoardDTO extends RequestDTO{
     	super.setSysNo(board.getSysNo());
     	super.setUserId(board.getUserId());
     	super.setUserSysNo(board.getUserSysNo());
+    	super.setCreateDate(board.getCreateDate());
+    	super.setModifyDate(board.getModifyDate());
     	this.title = board.getTitle();
     	this.content = board.getContent();
     	this.view = board.getView();
-    	this.likeCount = board.getLike();
+    	this.like = board.getLike();
     }
     
     /* BoardDTO -> Board Entity 변환 */

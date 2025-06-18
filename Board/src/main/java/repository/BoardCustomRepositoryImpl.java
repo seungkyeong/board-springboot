@@ -1,5 +1,6 @@
 package repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import dto.BoardDTO;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dto.SearchDTO;
 import entity.Board;
@@ -32,38 +33,19 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
 	 * myBoardList: 내가 쓴 게시물 조회
 	 * likeList: 좋아요 Top 게시물 조회 */
 	@Override
-	public Page<Board> getBoard(SearchDTO searchDto){
-		//검색 조건 생성
-        BooleanBuilder where = searchCondition(searchDto);      
-        
+	public Page<Board> getBoard(SearchDTO searchDto){    
         //페이징 정보 세팅
         Pageable pageable = PageRequest.of(searchDto.getPageIndex(), searchDto.getPageSize());
-    
-        //게시물 조회 쿼리 생성
-        JPQLQuery<Board> query = queryFactory
-                .selectFrom(board)
-                .where(where)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(orderSpecifier(searchDto.getType()));
-        
-        //내 좋아요 게시물 목록인 경우, 좋아요 로그와 inner join
-        if ("myLikeList".equals(searchDto.getType())) {
-            query = query
-                .innerJoin(likeLog)
-                .on(likeLog.boardSysNo.eq(board.sysNo)
-                		.and(likeLog.userSysNo.eq(searchDto.getUserSysNo())));
-        }
-        
-        //게시물 조회 쿼리 실행
-        List<Board> content = query.fetch();
         
         //전체 게시물 Count 조회
-        long totalCount = queryFactory
-            .select(board.count())
-            .from(board)
-            .where(where)
-            .fetchOne();
+        long totalCount = getTotalCount(searchDto);
+        
+        //게시물 조회 쿼리 실행
+        List<Board> content = buildBaseQuery(searchDto)
+        		.offset(pageable.getOffset())
+        		.limit(pageable.getPageSize())
+        	    .orderBy(orderSpecifier(searchDto.getType()).toArray(new OrderSpecifier[0]))
+        	    .fetch();
 
         return new PageImpl<>(content, pageable, totalCount);
 	}
@@ -132,18 +114,90 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
     }
 	
 	/* 정렬 조건 생성 */
-	private OrderSpecifier<?> orderSpecifier(String type) {
+	private List<OrderSpecifier<?>> orderSpecifier(String type) {
+		List<OrderSpecifier<?>> orders = new ArrayList<>();
+
 		switch(type) {
 			case "viewList":
-				return board.view.desc();
+				orders.add(board.view.desc());
+				orders.add(board.createDate.desc());
+				break;
 			case "likeList":
-				return board.like.desc();
+				orders.add(likeLog.sysNo.count().desc());
+				orders.add(board.createDate.desc());
+				break;
 			case "myLikeList":
-				return likeLog.createDate.desc();
+				orders.add(likeLog.createDate.desc());
+				break;
 			case "allList":
 			case "myBoardList":
 			default:
-				return board.createDate.desc();
+				orders.add(board.createDate.desc());
+				break;
 		}
+		return orders;
 	}
+	
+	
+	/* 게시글 Count Query 생성 */
+	private long getTotalCount(SearchDTO searchDto) {
+		if ("likeList".equals(searchDto.getType())) {
+	        BooleanBuilder where = searchCondition(searchDto);
+	        
+	        return queryFactory
+	            .select(board.sysNo.countDistinct())
+	            .from(board)
+	            .leftJoin(likeLog)
+	            .on(likeLog.boardSysNo.eq(board.sysNo))
+	            .where(where)
+	            .fetchOne();
+	    } else {
+	        return buildBaseQuery(searchDto)
+	            .select(board.count())
+	            .fetchOne();
+	    }
+    }
+	
+	/* 게시글 Base Query 생성 */
+	private JPAQuery<Board> buildBaseQuery(SearchDTO searchDto) {
+		//검색 조건 생성
+        BooleanBuilder where = searchCondition(searchDto);  
+        
+        if ("likeList".equals(searchDto.getType())) { //좋아요 TOP 게시물 목록인 경우, 좋아요 로그와 left outer join 
+            return queryFactory
+            		.select(
+            			Projections.constructor(
+        					Board.class,
+        				    board.sysNo,
+        				    board.title,
+        				    board.content,
+        				    board.userId,
+        				    board.userSysNo,
+        				    board.createDate,
+        				    board.modifyDate,
+        				    board.view,
+        				    board.imgPath,
+        				    likeLog.sysNo.count().as("like")
+        				  )
+            		)
+                    .from(board)
+                    .leftJoin(likeLog)
+                    .on(likeLog.boardSysNo.eq(board.sysNo))
+                    .where(where)
+                    .groupBy(board.sysNo);
+        } else {
+        	//게시물 조회 쿼리 생성
+            JPAQuery<Board> query = queryFactory
+                    .selectFrom(board)
+                    .where(where);
+            
+            if ("myLikeList".equals(searchDto.getType())) { //내 좋아요 게시물 목록인 경우, 좋아요 로그와 inner join
+                query = query
+                    .innerJoin(likeLog)
+                    .on(likeLog.boardSysNo.eq(board.sysNo)
+                    		.and(likeLog.userSysNo.eq(searchDto.getUserSysNo())));
+            } 
+            return query;
+        }
+    }
 }

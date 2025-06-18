@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 public class CommentDTO extends RequestDTO {
-    private String parSysNo;		    //상위 댓글 System No
+    private String parSysNo = "";		    //상위 댓글 System No
     private String boardSysNo;			//게시물 System No
     private String title;				//게시물 제목
     private String boardCreater;		//게시물 작성자 id
@@ -30,12 +30,12 @@ public class CommentDTO extends RequestDTO {
     /* CommentDTO -> Comment Entity 변환 */
     public Comment toEntity() {
         Comment comment = Comment.builder()
-        		.sysNo(this.getSysNo())
+        		.sysNo(super.getSysNo())
         		.parSysNo(parSysNo)
         		.boardSysNo(boardSysNo)
         		.comment(this.comment)
-        		.userId(boardCreater)
-        		.userSysNo(boardCreaterSysNo)
+        		.userId(super.getUserId())
+        		.userSysNo(super.getUserSysNo())
                 .build();
         return comment;
     }

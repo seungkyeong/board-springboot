@@ -18,7 +18,7 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 @RequiredArgsConstructor
 @Service
 public class S3Service {
-    private AmazonS3 amazonS3;
+    private final AmazonS3 amazonS3;
 
     /* presigned URL 생성 - upload */
     public URL generatePresignedUrl(String objectKey) {

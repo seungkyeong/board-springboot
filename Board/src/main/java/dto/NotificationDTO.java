@@ -33,9 +33,12 @@ public class NotificationDTO extends RequestDTO{
     /* NotificationDTO -> Notification Entity 변환 */
     public Notification toEntity() {
     	Notification notification = Notification.builder()
-        		.sysNo(this.getSysNo())
-                .userId(this.getUserId())
-                .userSysNo(this.getUserSysNo())
+        		.sysNo(super.getSysNo())
+                .userId(super.getUserId())
+                .userSysNo(super.getUserSysNo())
+                .boardSysNo(boardSysNo)
+                .title(title)
+                .read(readFlag)
                 .build();
         return notification;
     }

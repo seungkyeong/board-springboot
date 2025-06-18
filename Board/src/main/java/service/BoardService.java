@@ -37,7 +37,7 @@ import org.springframework.data.redis.core.ValueOperations;
 @Service
 public class BoardService {       
 	private final S3Service S3service;
-    private RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Long> redisTemplate;
 	private final NotificationWebSocketHandler notificationWebSocketHandler;
 	private final NotificationService NotificationService;
 	private final BoardRepository boardRepository;

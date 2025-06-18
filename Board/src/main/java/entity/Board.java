@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
+@Getter 
 @Entity
 public class Board {
 	/* 게시물 System no. */
@@ -58,6 +58,23 @@ public class Board {
     @Column(name = "create_date")
     private LocalDateTime createDate; 
     
+    /* 생성자 추가 */
+    public Board(String sysNo, String title, String content,
+    		String userId, String userSysNo, 
+    		LocalDateTime createDate, LocalDateTime modifyDate,
+    		long view, String imgPath, long like) {
+    	this.sysNo = sysNo;
+    	this.title = title;
+    	this.content = content;
+    	this.userId = userId;
+    	this.userSysNo = userSysNo; 
+		this.createDate = createDate;
+		this.modifyDate = modifyDate;
+		this.view = view;
+		this.imgPath = imgPath;
+		this.like = like;
+    }
+    
     /* 게시물 수정 */
     public void updateBoard(String title, String content, String imgPath) {
         this.title = title;
@@ -77,5 +94,4 @@ public class Board {
     public void preUpdate(){
        this.modifyDate = LocalDateTime.now();
     }
-
 }
