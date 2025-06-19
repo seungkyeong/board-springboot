@@ -22,6 +22,7 @@ import dto.ResponseDTO;
 import dto.SearchDTO;
 import entity.Board;
 import entity.Comment;
+import entity.User;
 import exceptionHandle.GeneralException;
 import lombok.RequiredArgsConstructor;
 import repository.BoardCustomRepositoryImpl;
@@ -190,10 +191,17 @@ public class BoardService {
     	}
     }
     
-    /* 게시물 조회수 1분마다 DB에 반영 --> 수정 해야 함 */
+    /* 게시물 조회수 1분마다 DB에 반영(TTL 만료시) */
     public void syncCount(Map<String, Object> requestData) throws Exception{
-    	// DB에 조회수 반영
-//        int data = Boarddao.syncCount(requestData);
+    	String sysNo = (String) requestData.get(AppConstant.Property.SYSNO);
+    	long view = (long) requestData.get(AppConstant.RedisKey.VIEW);
+    	
+    	//조회수 조회
+        Board board = boardRepository.findById(sysNo)
+    			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_BOARD.getCode(), ExceptionConstant.NOT_FOUND_BOARD.getMessage()));
+
+        //조회수 수정
+        board.updateBoard(view);
     }
     
     /* 댓글 생성, 수정 */ 
@@ -243,9 +251,10 @@ public class BoardService {
     @Transactional
     public void deleteLikeList(Map<String, Object> request) throws Exception{
     	List<String> deleteList = (List<String>) request.get(AppConstant.Property.DELETE_LIST);
+        String userSysNo = (String) request.get(AppConstant.Property.USER_SYSNO);
         
     	//게시물 좋아요 List 삭제
-    	likeRepository.deleteLikelog(deleteList);
+    	likeRepository.deleteMyLikelog(userSysNo, deleteList);
     }
 }
 

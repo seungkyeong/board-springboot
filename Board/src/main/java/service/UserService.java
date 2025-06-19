@@ -139,12 +139,20 @@ public class UserService {
     /* 회원 정보 수정(비밀번호) */ 
     @Transactional
     public void updateUserPw(Map<String, String> request) throws Exception{
-    	//회원 정보 조회
-        User user = userRepository.findById(request.get(AppConstant.Property.SYSNO))
+    	//사용자 정보 가져오기 
+    	User user = userRepository.findById(request.get(AppConstant.Property.SYSNO))
     			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_USER.getCode(), ExceptionConstant.NOT_FOUND_USER.getMessage()));
 
+        //현재 비밀번호 일치 여부 확인
+        if (!passwordEncoder.matches(request.get(AppConstant.Property.CURRENT_PW), user.getPassword())) {
+        	throw new GeneralException(ExceptionConstant.PASSWORD_NOT_MATCH.getCode(), ExceptionConstant.PASSWORD_NOT_MATCH.getMessage());
+        }
+
+        //새 비밀번호 암호화
+        String newPassword = passwordEncoder.encode(request.get(AppConstant.Property.NEW_PW));
+        
         //회원 정보 수정
-        user.updateUser(request.get(AppConstant.Property.NEW_PW));
+        user.updateUser(newPassword);
     }
 }
 

@@ -82,6 +82,11 @@ public class Board {
         this.imgPath = imgPath;
     }
     
+    /* 게시물 조회수 수정 */
+    public void updateBoard(long view) {
+        this.view = view;
+    }
+    
     /* Insert 이전에 실행 */
     @PrePersist
     public void prePersist(){
