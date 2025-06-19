@@ -12,7 +12,6 @@
 - [구조 및 설계](#2-구조-및-설계)
   - [인프라 구조](#2-1-인프라-구조)
   - [DB 설계](#2-2-DB-설계)
-  - [API 명세](#2-3-API-명세)
 - [실행 화면](#3-실행-화면)
 - [느낀점](#4-느낀점)
 <br/>
@@ -116,9 +115,6 @@
 | title | varchar(100) | Not Null | 게시글 제목 |
 | create_date | datetime | Not Null | 생성일자 |
 | modify_date | datetime | Not Null | 수정일자 |
-<br/>
-
-#### 2-3. API 명세 
 <br/>
 
 ### 3. 실행 화면
