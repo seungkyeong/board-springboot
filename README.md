@@ -38,7 +38,8 @@
 - Vue 3.2.13
 - Pinia 4.0.3
 - Element Plus 2.8.8
-- jsonwebtoken 9.0.2 / jwt-decode 4.0.0  
+- jsonwebtoken 9.0.2 / jwt-decode 4.0.0
+- GitHub URL: https://github.com/seungkyeong/board-vue3.git 
 <br/>
 
 ### 2. 구조 및 설계
