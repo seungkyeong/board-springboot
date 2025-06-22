@@ -162,7 +162,7 @@
 
 **3. 게시글 상세보기**
 <p align="left">
-  <img src="https://github.com/user-attachments/assets/38c49ee3-abc4-480c-af10-d668547d31ae" width="750" alt="게시글상세보기">
+  <img src="https://github.com/user-attachments/assets/ed19d89e-8795-4011-ad87-597ed0069e88" width="750" alt="게시글상세보기">
 </p>
 
 - 게시글에 좋아요 버튼을 누를 수 있다.
@@ -206,18 +206,36 @@
   
   - JWT와 Spring Security를 사용하여 로그인을 검증한다.
 
-  **3. 아이디/비밀번호 찾기**
+  **3. 아이디 찾기**
   <p align="left">
-  <img src="https://github.com/user-attachments/assets/b1394d26-1144-451f-abe4-5773b95f94f0" width="400" alt="비밀번호찾기"><br/>
-  <img src="https://github.com/user-attachments/assets/79861a59-cac9-4b6d-835e-30ce8a0eb819" width="400" alt="아이디찾기">
+  <img src="https://github.com/user-attachments/assets/7a2ebf14-2722-495c-bd89-bf8ec62d805e" width="400" alt="아이디찾기">
+  </p>
+  
+  - 이메일 입력 후 아이디 찾기 버튼 클릭
+
+  <p>
+  <img src="https://github.com/user-attachments/assets/271050aa-db88-45ae-8d95-52e163ad32ce" width="400" alt="아이디찾기결과">
   </p>
 
-   **4. 회원 정보 상세보기/수정**
+  **4. 비밀번호 찾기**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/6fab58a2-2f33-42c6-92c1-bee0b4899f84" width="400" alt="비밀번호찾기">
+  </p>
+
+  - 아이디, 이메일 입력 후 비밀번호 찾기 버튼 클릭
+
+  <p>
+  <img src="https://github.com/user-attachments/assets/ca6e946a-0d4e-4144-8ba7-edf956d0d1bc" width="350" alt="비밀번호재설정">
+  </p>
+
+  - 비밀번호를 재설정한다.
+
+  **5. 회원 정보 상세보기/수정**
   <p align="left">
   <img src="https://github.com/user-attachments/assets/bcc7dbd6-3bac-4b9a-9001-ba2c302d7460" width="400" alt="회원정보상세보기">
   </p>
 
-   **5. 비밀번호 변경**
+  **6. 비밀번호 변경**
   <p align="left">
   <img src="https://github.com/user-attachments/assets/1e7d20ea-8b16-42a6-9de6-19ccfec69690" width="400" alt="비밀번호변경">
   </p>
@@ -229,11 +247,40 @@
   
   **1. 댓글 조회/생성**
   <p align="left">
-  <img src="https://github.com/user-attachments/assets/60f237ea-cd55-48e8-a093-5befb0e2179e" width="700" alt="댓글조회및생성">
+  <img src="https://github.com/user-attachments/assets/10fefdc7-6a9a-431e-a60c-5fd6c0552294" width="700" alt="댓글조회및생성">
   </p>
 
   - [게시글 상세보기] 하단에서 댓글을 등록할 수 있다.
-  - 댓글에 대한 답글을 등록할 수 있다.이메일은 중복될 수 없다. 
+  - 답글 버튼으로 답글 목록을 열고 닫을 수 있다.
+  - 댓글에 대한 답글을 등록할 수 있다.
+
+  **2. 댓글 수정**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/30b61f78-ac67-4d86-9e41-08687dc53da2" width="700" alt="댓글Profile">
+  </p>
+
+  - 수정하고자 하는 댓글의 … 버튼에서 수정하기 클릭
+  - 댓글 작성자만 수정할 수 있다. (작성자가 아닌 경우, ‘작성자와 일치하지 않습니다.’ 창이 뜬다.)
+
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/746bf912-564d-4857-8a48-d679b4ba2097" width="700" alt="댓글수정">
+  </p>
+
+  - 댓글을 수정한다.
+
+  **3. 댓글 삭제**
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/30b61f78-ac67-4d86-9e41-08687dc53da2" width="700" alt="댓글Profile">
+  </p>
+
+  - 삭제하고자 하는 댓글의 … 버튼에서 삭제하기 클릭
+  - 댓글 작성자만 삭제할 수 있다. (작성자가 아닌 경우, ‘작성자와 일치하지 않습니다.’ 창이 뜬다.)
+
+  <p align="left">
+  <img src="https://github.com/user-attachments/assets/c8a7ad97-9f6a-4096-9548-529a2bcd0cf7" width="700" alt="댓글삭제">
+  </p>
+
+  - 대댓글이 있는 경우, ‘삭제된 댓글입니다.’ 라고 표시된다. (대댓글이 없는 경우 표시되지 않는다.)
 </details>
 
 <!-- 알림 토글 -->
