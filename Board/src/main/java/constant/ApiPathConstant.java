@@ -14,6 +14,7 @@ public class ApiPathConstant {
         public static final String GET_DETAIL = "/userDetail";
         public static final String UPDATE_DETAIL = "/updateUserDetail";
         public static final String UPDATE_PW = "/updateUserPw";
+        public static final String RESET_PW = "/resetUserPw";
     }
 	
 	public static class BOARD {
@@ -27,7 +28,7 @@ public class ApiPathConstant {
         public static final String POST_COMMENT = "/comment";
         public static final String DELETE_BOARD = "/boardDelete";
         public static final String DELETE_LIKE = "/likeDelete";
-        
+        public static final String DELETE_COMMENT = "/commentDelete";
     }
 
     public static class NOTI {

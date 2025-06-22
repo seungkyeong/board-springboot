@@ -25,6 +25,7 @@ public class SecurityConfig {
 	private static final String SIGNUP_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.SIGNUP;
 	private static final String LOGIN_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.LOGIN;
 	private static final String FIND_ID_PW_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.FIND_ID_PW;
+	private static final String RESET_PW_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.RESET_PW;
 	
 	/* password 암호화 */
     @Bean
@@ -49,7 +50,7 @@ public class SecurityConfig {
          .csrf(csrf -> csrf.disable()) 													//CSRF 비활성화
     	.addFilterAt(jsonFilter, UsernamePasswordAuthenticationFilter.class)			//커스텀 필터(jsonFilter) 등록
         .authorizeHttpRequests(auth -> auth
-        	.requestMatchers(SIGNUP_PATH, LOGIN_PATH, FIND_ID_PW_PATH).permitAll() 					//허용 경로 
+        	.requestMatchers(SIGNUP_PATH, LOGIN_PATH, FIND_ID_PW_PATH, RESET_PW_PATH).permitAll() 					//허용 경로 
         	.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 					//preflight 허용 
             .anyRequest().authenticated()
         )

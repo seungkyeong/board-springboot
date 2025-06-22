@@ -85,7 +85,7 @@ public class BoardController {
     /* 댓글 생성, 수정 */
     @PostMapping (ApiPathConstant.BOARD.POST_COMMENT) 
     public ResponseEntity<ResponseDTO<Object>> postComment(@RequestBody CommentDTO comment) throws Exception {
-    	boardService.createComment(comment);
+    	boardService.postComment(comment);
     	
     	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     }
@@ -102,6 +102,14 @@ public class BoardController {
     @PostMapping(ApiPathConstant.BOARD.DELETE_LIKE)
     public ResponseEntity<ResponseDTO<Object>> deleteLikeList(@RequestBody Map<String, Object> request) throws Exception {
     	boardService.deleteLikeList(request);
+    	
+    	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
+    }
+    
+    /* 댓글 삭제 */
+    @PostMapping (ApiPathConstant.BOARD.DELETE_COMMENT) 
+    public ResponseEntity<ResponseDTO<Object>> deleteComment(@RequestBody Map<String, Object> request) throws Exception {
+    	boardService.deleteComment(request);
     	
     	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     }

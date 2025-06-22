@@ -62,4 +62,9 @@ public class Comment {
     public void preUpdate(){
         this.modifyDate = LocalDateTime.now();
     }
+    
+    /* 댓글 수정 */
+    public void updateComment(String comment) {
+        this.comment = comment;
+    }
 }

@@ -10,7 +10,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     /* 사용자 조회 */
 	Optional<User> findById(String sysNo);
 	Optional<User> findByEmail(String email);
-	Optional<User> findByUserId(String id); //사용자 정보 조회
+	Optional<User> findByUserIdAndEmail(String id, String email); 
 
 	@EntityGraph(attributePaths = "role")
 	Optional<User> findWithRoleByUserId(String userId); //사용자 정보 + Role 정보 조회

@@ -22,7 +22,6 @@ import dto.ResponseDTO;
 import dto.SearchDTO;
 import entity.Board;
 import entity.Comment;
-import entity.User;
 import exceptionHandle.GeneralException;
 import lombok.RequiredArgsConstructor;
 import repository.BoardCustomRepositoryImpl;
@@ -134,7 +133,7 @@ public class BoardService {
     	}
     	
     	//댓글 조회
-    	List<Comment> comments = commentRepository.findByBoardSysNo(boardSysNo);
+    	List<Comment> comments = commentRepository.findByBoardSysNoOrderByCreateDateDesc(boardSysNo);
     	
         //댓글 순회하면서 부모(루트), 자식 나누기 
         for (Comment comment : comments) {
@@ -150,10 +149,25 @@ public class BoardService {
 
         //자식 댓글 순회하면서 부모의 대댓글에 자식 세팅
         for (CommentDTO comment : childComments) {
-            CommentDTO parent = parentComments.get(comment.getParSysNo()); //부모 찾기
-            if (parent != null) {
-                parent.getReplies().add(comment);
-            }
+        	//부모 있는지 확인
+        	if(comment.getParSysNo() != null && !comment.getParSysNo().equals("")) {
+        		CommentDTO parent = parentComments.get(comment.getParSysNo()); //부모 찾기
+        		
+                if (parent != null) { //부모가 삭제되지 않은 경우 
+                    parent.getReplies().add(comment);
+                } else { //부모가 삭제된 경우
+                	//삭제된 부모 생성
+                	CommentDTO commentdto = new CommentDTO(comment.getParSysNo(), comment.getBoardSysNo(), "삭제된 댓글입니다.");
+                	commentList.add(commentdto);
+                	
+                	//parentComments에 삭제된 부모 세팅
+                	parentComments.put(comment.getParSysNo(), commentdto);
+                	parent = parentComments.get(comment.getParSysNo());
+                	
+                	//삭제된 부모 대댓글에 자식 댓글 세팅
+                	parent.getReplies().add(comment);
+                }
+        	}
         }
     	
         //img String -> Array로 변경
@@ -192,6 +206,7 @@ public class BoardService {
     }
     
     /* 게시물 조회수 1분마다 DB에 반영(TTL 만료시) */
+    @Transactional
     public void syncCount(Map<String, Object> requestData) throws Exception{
     	String sysNo = (String) requestData.get(AppConstant.Property.SYSNO);
     	long view = (long) requestData.get(AppConstant.RedisKey.VIEW);
@@ -206,21 +221,30 @@ public class BoardService {
     
     /* 댓글 생성, 수정 */ 
     @Transactional
-    public void createComment(CommentDTO comment) throws Exception{
-    	String boardCreater = comment.getBoardCreaterSysNo(); //게시물 작성자 SysNo
-    	String commentCreater = comment.getUserSysNo(); //댓글 작성자 SysNo
+    public void postComment(CommentDTO commentDto) throws Exception{
+    	String boardCreater = commentDto.getBoardCreaterSysNo(); //게시물 작성자 SysNo
+    	String commentCreater = commentDto.getUserSysNo(); //댓글 작성자 SysNo
     	
-    	//댓글 생성
-    	comment.setSysNo(UUID.randomUUID().toString().replace("-", "")); //댓글 system_no 생성
-        commentRepository.save(comment.toEntity());
+    	if(commentDto.getSysNo().equals("")) { //신규 생성인 경우 
+    		//댓글 생성
+    		commentDto.setSysNo(UUID.randomUUID().toString().replace("-", "")); //댓글 system_no 생성
+            commentRepository.save(commentDto.toEntity());
+        }else { //수정인 경우
+        	//댓글 조회
+        	Comment comment = commentRepository.findById(commentDto.getSysNo())
+        			.orElseThrow(() -> new GeneralException(ExceptionConstant.NOT_FOUND_COMMENT.getCode(), ExceptionConstant.NOT_FOUND_COMMENT.getMessage()));
+
+        	//댓글 수정
+        	comment.updateComment(commentDto.getComment());
+        }
     	
     	//게시글 작성자에게 알림 전송(게시글 작성자 != 댓글 작성자인 경우만 해당)
         if (!boardCreater.equals(commentCreater)) {
         	//Noti 저장
-        	NotificationService.saveNotification(comment);
+        	NotificationService.saveNotification(commentDto);
            
         	//Noti 알림 보내기
-        	notificationWebSocketHandler.sendNotification(comment.getBoardCreaterSysNo(), AppConstant.SOCKET_MESSAGE);
+        	notificationWebSocketHandler.sendNotification(commentDto.getBoardCreaterSysNo(), AppConstant.SOCKET_MESSAGE);
         }
     }
     
@@ -255,6 +279,14 @@ public class BoardService {
         
     	//게시물 좋아요 List 삭제
     	likeRepository.deleteMyLikelog(userSysNo, deleteList);
+    }
+    
+    /* 댓글 삭제 */ 
+    @Transactional
+    public void deleteComment(Map<String, Object> request) throws Exception{
+    	String sysNo = (String) request.get("sysNo");
+    	//댓글 삭제
+    	commentRepository.deleteById(sysNo);
     }
 }
 

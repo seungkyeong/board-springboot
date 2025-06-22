@@ -17,6 +17,8 @@ public enum ExceptionConstant {
 	UNAUTHORIZED(20008, "Unauthorized."),
 	INVALID_EXPIRED_TOKEN(20009, "Invalid or expired token."),
 	INVALID_AUTH_HEADER(20010, "Authorization header is missing or invalid"),
+	NEW_CONFIRM_PASSWORD_NOT_MATCH(20011, "The new password and confirmation password do not match."),
+	NOT_FOUND_COMMENT(20012, "Comment not found."),
 	
 	//얘네 한번 확인
     BAD_REQUEST(10000, "Bad request"),
