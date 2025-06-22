@@ -25,6 +25,15 @@ public class CommentDTO extends RequestDTO {
     	super.setUserSysNo(comment.getUserSysNo());
     	this.boardSysNo = comment.getBoardSysNo();
     	this.parSysNo = comment.getParSysNo();
+    	super.setCreateDate(comment.getCreateDate());
+    	super.setModifyDate(comment.getModifyDate());
+    }
+    
+    public CommentDTO(String sysNo, String boardSysNo, String comment) {
+    	super.setSysNo(sysNo);
+    	this.comment = comment;
+    	this.boardSysNo = boardSysNo;
+    	this.setUserId("*****");
     }
     
     /* CommentDTO -> Comment Entity 변환 */

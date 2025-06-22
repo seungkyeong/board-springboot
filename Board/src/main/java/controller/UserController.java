@@ -68,6 +68,14 @@ public class UserController {
     	
     	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
     }
+    
+    /* 비밀번호 재설정 */
+    @PostMapping(ApiPathConstant.USER.RESET_PW)
+    public ResponseEntity<ResponseDTO<Object>> resetUserPw(@RequestBody Map<String, String> request) throws Exception {
+    	userService.resetUserPw(request);
+    	
+    	return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO<>());
+    }
 }
 
 

@@ -23,6 +23,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private static final String LOGIN_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.LOGIN; 
     private static final String SIGNUP_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.SIGNUP; 
     private static final String FINDIDPW_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.FIND_ID_PW;
+    private static final String RESETPW_PATH = ApiPathConstant.API_ROOT + ApiPathConstant.USER.RESET_PW;
     
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,8 +43,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
         
-        // 로그인/회원가입/Id,Pw 찾기 경로는 JWT 검증 건너뛰기
-        if (request.getRequestURI().equals(LOGIN_PATH) || request.getRequestURI().equals(SIGNUP_PATH) || request.getRequestURI().equals(FINDIDPW_PATH)) {
+        // 로그인/회원가입/Id,Pw 찾기/Pw 재설정 경로는 JWT 검증 건너뛰기
+        if (request.getRequestURI().equals(LOGIN_PATH) || request.getRequestURI().equals(SIGNUP_PATH) || request.getRequestURI().equals(FINDIDPW_PATH) || request.getRequestURI().equals(RESETPW_PATH)) {
             filterChain.doFilter(request, response); //JWT 검사를 건너뛰고, 요청을 다음 필터에 전달
             return;
         }
