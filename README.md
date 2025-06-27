@@ -132,12 +132,12 @@
   - 최신 생성 순서대로 전체 게시글 목록을 조회한다. <br>
   
   *1-2. 조회수 Top 게시글 목록*
-  ![좋아요Top게시글목록](https://github.com/user-attachments/assets/b4cbb4d4-2ab1-4c34-819d-062849028068)
+  ![좋아요Top게시글목록](https://github.com/user-attachments/assets/effba0b1-a093-49be-8a3c-e9d488ea2ad0)
   - 상단 [조회수 TOP] 메뉴 클릭
   - 조회수가 높은 순서대로 게시글 목록을 조회한다.
 
   *1-3. 좋아요 Top 게시글 목록*
-  ![조회수Top게시글목록](https://github.com/user-attachments/assets/effba0b1-a093-49be-8a3c-e9d488ea2ad0)
+  ![조회수Top게시글목록](https://github.com/user-attachments/assets/b4cbb4d4-2ab1-4c34-819d-062849028068)
   - 상단 [좋아요 TOP] 메뉴 클릭
   - 좋아요 수가 높은 순서대로 게시글 목록을 조회한다.
 
